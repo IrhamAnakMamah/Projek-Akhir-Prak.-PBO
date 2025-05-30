@@ -30,10 +30,10 @@ public class DAOUser implements InterfaceDAOUser{
     }
 
     @Override
-    public List<ModelUser> getUser(String username, String password) {
+    public List<ModelUser> getUser(ModelUser user) {
         List<ModelUser> users = null;
 
-        // jika ukuran lebih dari 0, maka register gagal dan harus mengulang kembali
+        // jika ukuran lebih dari 0, maka login berhasil
         try{
             users = new ArrayList<>();
             String query = "SELECT * FROM user where username =? AND password =?;";
@@ -41,16 +41,16 @@ public class DAOUser implements InterfaceDAOUser{
             PreparedStatement statement;
             statement = Connector.Connect().prepareStatement(query);
 
-            statement.setString(1, username);
-            statement.setString(2, password);
+            statement.setString(1, user.getNama());
+            statement.setString(2, user.getPass());
 
-            ResultSet resultSet = statement.executeQuery(query);
+            ResultSet resultSet = statement.executeQuery();
 
             while(resultSet.next()){
                 ModelUser usr = new ModelUser();
                 usr.setNama(resultSet.getString("username"));
                 usr.setPass(resultSet.getString("password"));
-                usr.setId(resultSet.getInt("id"));
+                usr.setId(resultSet.getInt("id_user"));
 
                 users.add(usr);
             }
@@ -64,25 +64,25 @@ public class DAOUser implements InterfaceDAOUser{
     }
 
     @Override
-    public List<ModelUser> getUserbyUsername(String username) {
+    public List<ModelUser> getUserbyUsername(ModelUser user) {
         List<ModelUser> users = null;
 
-        // jika ukuran lebih dari 0, maka login berhasil
+        // jika ukuran lebih dari 0, maka register gagal dan harus mengulang kembali
         try{
             users = new ArrayList<>();
             String query = "SELECT * FROM user where username =?;";
             PreparedStatement statement;
             statement = Connector.Connect().prepareStatement(query);
 
-            statement.setString(1, username);
+            statement.setString(1, user.getNama());
 
-            ResultSet resultSet = statement.executeQuery(query);
+            ResultSet resultSet = statement.executeQuery();
 
             while(resultSet.next()){
                 ModelUser usr = new ModelUser();
                 usr.setNama(resultSet.getString("username"));
                 usr.setPass(resultSet.getString("password"));
-                usr.setId(resultSet.getInt("id"));
+                usr.setId(resultSet.getInt("id_user"));
 
                 users.add(usr);
             }

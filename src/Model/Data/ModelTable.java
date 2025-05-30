@@ -6,7 +6,7 @@ import java.util.List;
 public class ModelTable extends AbstractTableModel {
     List<ModelData> daftarData;
 
-    String kolom[] = {"Nama", "Tanggal Lahir", "Prediksi"};
+    String kolom[] = {"ID", "Nama", "Tanggal Lahir"};
     public ModelTable(List<ModelData> daftarData) {
         this.daftarData = daftarData;
     }

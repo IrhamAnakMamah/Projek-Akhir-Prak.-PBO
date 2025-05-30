@@ -1,7 +1,6 @@
 package Model.Data;
 
 import Database.Connector;
-import Model.User.ModelUser;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

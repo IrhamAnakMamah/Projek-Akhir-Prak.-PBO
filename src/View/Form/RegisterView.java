@@ -1,5 +1,7 @@
 package View.Form;
 
+import Controller.ControllerUser;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -9,6 +11,8 @@ import javax.swing.border.Border;
 import java.awt.geom.RoundRectangle2D;
 
 public class RegisterView extends JFrame {
+
+    ControllerUser controller;
 
     private JTextField usernameField;
     private JPasswordField passwordField;
@@ -21,7 +25,7 @@ public class RegisterView extends JFrame {
     public RegisterView() {
         setTitle("Register");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 400);
+        setSize(800, 800); // defaultnya 400 , 400
         setLocationRelativeTo(null);
         setResizable(false);
         getContentPane().setBackground(new Color(30, 30, 30));
@@ -144,6 +148,8 @@ public class RegisterView extends JFrame {
         gbc.weighty = 1;
         add(emptyLabel, gbc);
 
+        controller = new ControllerUser(this);
+
         // Action Listeners
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -160,7 +166,7 @@ public class RegisterView extends JFrame {
                 String confirmPassword = new String(confirmPasswordField.getPassword());
 
                 if (password.equals(confirmPassword)) {
-                    System.out.println("Username: " + username + ", Password: " + password);
+                    controller.cekRegister();
                 } else {
                     JOptionPane.showMessageDialog(RegisterView.this, "Passwords do not match!", "Error", JOptionPane.ERROR_MESSAGE);
                 }
@@ -225,7 +231,17 @@ public class RegisterView extends JFrame {
         }
     }
 
-    public static void main(String[] args) {
-        new RegisterView();
+    public String getNama(){
+        return usernameField.getText();
+    }
+
+    public String getPassword(){
+        return new String(passwordField.getPassword());
+    }
+
+    public void Reset(){
+        usernameField.setText("");
+        passwordField.setText("");
+        confirmPasswordField.setText("");
     }
 }

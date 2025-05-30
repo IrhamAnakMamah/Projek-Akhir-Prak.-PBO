@@ -1,5 +1,7 @@
 package View.Form;
 
+import Controller.ControllerUser;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -9,6 +11,8 @@ import javax.swing.border.Border;
 import java.awt.geom.RoundRectangle2D;
 
 public class LoginView extends JFrame {
+
+    ControllerUser controller;
 
     private JTextField usernameField;
     private JPasswordField passwordField;
@@ -20,7 +24,7 @@ public class LoginView extends JFrame {
     public LoginView() {
         setTitle("Login");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 350);
+        setSize(700, 500); // default 400,350
         setLocationRelativeTo(null);
         setResizable(false);
         getContentPane().setBackground(new Color(30, 30, 30));
@@ -110,6 +114,8 @@ public class LoginView extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         add(registerButton, gbc);
 
+        controller = new ControllerUser(this);
+
         // Action Listeners
         registerButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -121,9 +127,7 @@ public class LoginView extends JFrame {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String username = usernameField.getText();
-                String password = new String(passwordField.getPassword());
-                System.out.println("Username: " + username + ", Password: " + password);
+                controller.cekLogin();
             }
         });
 
@@ -185,7 +189,16 @@ public class LoginView extends JFrame {
         }
     }
 
-    public static void main(String[] args) {
-        new LoginView();
+    public String getNama(){
+        return usernameField.getText();
+    }
+
+    public String getPassword(){
+        return new String(passwordField.getPassword());
+    }
+
+    public void Reset(){
+        usernameField.setText("");
+        passwordField.setText("");
     }
 }
