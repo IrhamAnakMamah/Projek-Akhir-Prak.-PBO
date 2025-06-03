@@ -74,21 +74,20 @@ public class DAOData implements InterfaceDAOData{
 
         try{
             Data = new ArrayList<>();
-            String query = "SELECT * FROM data where user_id=?;";
+            System.out.println("TESS");
+            String query = "SELECT nama,tanggal_lahir FROM data where id_user=?;";
 
             PreparedStatement statement;
             statement = Connector.Connect().prepareStatement(query);
             statement.setInt(1,user_id);
 
-            ResultSet resultSet = statement.executeQuery(query);
+            ResultSet resultSet = statement.executeQuery();
 
             while(resultSet.next()){
                 ModelData dt = new ModelData();
-                dt.setNama(resultSet.getString("username"));
-                dt.setId_user(resultSet.getInt("id_user"));
-                dt.setId_data(resultSet.getInt("id_data"));
-                dt.setPrediksi(resultSet.getString("prediksi"));
-                dt.setTanggal(resultSet.getString("tanggal"));
+                dt.setNama(resultSet.getString("nama"));
+                dt.setTanggal(resultSet.getString("tanggal_lahir"));
+                dt.setPrediksi("Lihat");
 
                 Data.add(dt);
             }

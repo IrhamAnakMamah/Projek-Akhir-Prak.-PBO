@@ -155,5 +155,5 @@ public class MainView extends JFrame {
     // Kalo mau tes MainView ini aja, bisa uncomment main method di bawah
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new MainView().setVisible(true));
-     }
+    }
 }

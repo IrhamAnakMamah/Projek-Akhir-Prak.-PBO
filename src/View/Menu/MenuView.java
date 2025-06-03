@@ -1,5 +1,6 @@
 package View.Menu;
 
+import Controller.ControllerData;
 import Model.User.ModelUser; // PERLU IMPORT INI
 import View.Form.LoginView;
 
@@ -15,6 +16,7 @@ import javax.swing.border.Border;
 
 public class MenuView extends JFrame {
 
+    ControllerData controller;
     private ModelUser loggedInUser; // Buat nyimpen info user yang login
 
     private JLabel logoLabel;
@@ -131,12 +133,12 @@ public class MenuView extends JFrame {
 
         // Tabel Data
         String[] columnNames = {"Nama", "Tanggal", "Prediksi"};
-        Object[][] dummyData = {
-                {"Budi Santoso", "2024-05-10", "Lihat"},
-                {"Siti Aminah", "2024-05-11", "Lihat"},
-                {"Charlie", "2024-05-12", "Lihat"}
-        };
-        DefaultTableModel tableModel = new DefaultTableModel(dummyData, columnNames) {
+//        Object[][] dummyData = {
+//                {"Budi Santoso", "2024-05-10", "Lihat"},
+//                {"Siti Aminah", "2024-05-11", "Lihat"},
+//                {"Charlie", "2024-05-12", "Lihat"}
+//        };
+        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return column == 2;
@@ -159,6 +161,9 @@ public class MenuView extends JFrame {
         tableHeader.setForeground(new Color(80, 80, 80));
         tableHeader.setBorder(BorderFactory.createEmptyBorder(8,5,8,5));
         tableHeader.setOpaque(false);
+
+        controller = new ControllerData(this);
+        controller.showAllData();
 
         // Font tombol di tabel diubah jadi BOLD
         dataTable.getColumn("Prediksi").setCellRenderer(new ButtonRenderer("Lihat"));
@@ -248,6 +253,14 @@ public class MenuView extends JFrame {
         }
         @Override public boolean stopCellEditing() { pushed = false; return super.stopCellEditing(); }
         @Override protected void fireEditingStopped() { super.fireEditingStopped(); }
+    }
+
+    public int getIdUser(){
+        return loggedInUser.getId();
+    }
+
+    public JTable getTableData(){
+        return dataTable;
     }
 
     public static void main(String[] args) {
