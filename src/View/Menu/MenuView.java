@@ -179,7 +179,11 @@ public class MenuView extends JFrame {
         roundedContentHolder.add(scrollPane, BorderLayout.CENTER);
 
         // Action Listeners
-        addButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Fitur Tambah Data"));
+        // WARNING : ACTION LISTENERS
+        addButton.addActionListener(e -> {
+            new AddView();
+            dispose();
+        });
         editButton.addActionListener(e -> { /* ... */ });
         deleteButton.addActionListener(e -> { /* ... */ });
         logoutButton.addActionListener(e -> {

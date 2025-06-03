@@ -10,7 +10,6 @@ public class PlayMusic implements Runnable {
     String link;
     public PlayMusic() {
         link = "D:\\Kuliah\\Semester 4\\Prak. PBO\\Projek_Akhir\\src\\Main\\background.wav";
-
     }
 
     @Override
@@ -18,7 +17,7 @@ public class PlayMusic implements Runnable {
         Sound(link);
         try {
             // Contoh: Biarkan berjalan selama 30 detik
-            Thread.sleep(30000);
+            Thread.sleep(3000000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
