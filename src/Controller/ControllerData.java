@@ -56,6 +56,22 @@ public class ControllerData {
             if ("".equals(nama) || "".equals(tanggal)) {
                 throw new Exception("Nama atau Tanggal tidak boleh kosong!");
             }
+            boolean ok = true;
+            for (int i = 0; i<nama.length(); i++) {
+                char cek = nama.charAt(i);
+                if(cek>='0' && cek<='9'){
+                    ok = false;
+                }
+            }
+            if(!ok){
+                throw new Exception("Nama tidak boleh ada angka");
+            }
+
+            LocalDate date = LocalDate.now();
+            LocalDate input = LocalDate.parse(tanggal, DateTimeFormatter.ISO_LOCAL_DATE);
+            if(input.isAfter(date)){
+                throw new Exception("Bro Lahir Duluan");
+            }
             data.setNama(nama);
             data.setTanggal(tanggal);
             daodata.insert(data, idUser);
@@ -77,6 +93,22 @@ public class ControllerData {
             String tanggal = halamanEdit.getInputTanggal();
             if ("".equals(nama) || "".equals(tanggal)) {
                 throw new Exception("Nama atau Tanggal tidak boleh kosong!");
+            }
+            boolean ok = true;
+            for (int i = 0; i<nama.length(); i++) {
+                char cek = nama.charAt(i);
+                if(cek>='0' && cek<='9'){
+                    ok = false;
+                }
+            }
+            if(!ok){
+                throw new Exception("Nama tidak boleh ada angka");
+            }
+
+            LocalDate date = LocalDate.now();
+            LocalDate input = LocalDate.parse(tanggal, DateTimeFormatter.ISO_LOCAL_DATE);
+            if(input.isAfter(date)){
+                throw new Exception("Bro Lahir Duluan");
             }
             data.setNama(nama);
             data.setTanggal(tanggal);

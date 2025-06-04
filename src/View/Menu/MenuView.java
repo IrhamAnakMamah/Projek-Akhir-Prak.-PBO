@@ -192,7 +192,6 @@ public class MenuView extends JFrame {
         addButton.addActionListener(e -> {
             // Buka AddView, kirim ID user yang login
             new AddView(loggedInUser.getId(), this).setVisible(true);
-            controller.showAllData();
         });
 
         editButton.addActionListener(e -> {

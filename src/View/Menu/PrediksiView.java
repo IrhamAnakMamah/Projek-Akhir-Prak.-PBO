@@ -12,7 +12,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class PrediksiView extends JFrame {
-
     // ... (variabel field lain sama kayak PrediksiView sebelumnya)
     private JLabel namaValueLabel, tanggalValueLabel;
     private JTextArea prediksiTextArea;
