@@ -1,25 +1,28 @@
-package View.Menu; // Pastikan package view menu lu bener
+package View.Menu; // Sesuaikan package
 
 import Controller.ControllerData;
-import Model.User.ModelUser; //
-import View.Form.LoginView;  //
-// Kalo mau pake CustomDialogView, import di sini. Contoh:
-// import View.Util.CustomDialogView;
+import Model.Data.ModelData; // Import ModelData
+import Model.User.ModelUser;
+import View.Form.LoginView;
+// import View.Util.CustomDialogView; // Kalo mau pake dialog custom buat info/error
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader; //
-import javax.swing.table.TableCellRenderer; //
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List; // Buat akses daftarData kalo ada
 
 public class MenuView extends JFrame {
 
-    ControllerData controller; //
-    private ModelUser loggedInUser; //
+    ControllerData controller;
+    private ModelUser loggedInUser;
+    // Kalo ControllerData nyimpen list data yang ditampilin, kita bisa akses buat ambil ModelData
+    // private List<ModelData> daftarTabelData; // Contoh, ini perlu diisi oleh ControllerData
 
     private JLabel logoLabel;
     private JLabel welcomeLabel;
@@ -40,7 +43,6 @@ public class MenuView extends JFrame {
     private final Color TABLE_CELL_FONT_COLOR = new Color(210, 215, 220);
     private final Color TABLE_SELECTION_BG_COLOR = new Color(DATA_AREA_BORDER_COLOR.getRed(), DATA_AREA_BORDER_COLOR.getGreen(), DATA_AREA_BORDER_COLOR.getBlue(), 70);
 
-
     public MenuView(ModelUser user) {
         this.loggedInUser = user;
 
@@ -54,17 +56,16 @@ public class MenuView extends JFrame {
         try {
             java.net.URL bgUrl = getClass().getResource("/resources/BackgroundMainView.png");
             if (bgUrl != null) backgroundImage = new ImageIcon(bgUrl);
-            else System.err.println("Background image GAK KETEMU di MenuView! Path: /resources/BackgroundMainView.png");
+            else System.err.println("BG Image GAK KETEMU di MenuView!");
 
             java.net.URL logoUrl = getClass().getResource("/resources/logoMainView.png");
             if (logoUrl != null) personaPredictionLogo = new ImageIcon(logoUrl);
-            else System.err.println("Logo image GAK KETEMU di MenuView! Path: /resources/logoMainView.png");
+            else System.err.println("Logo GAK KETEMU di MenuView!");
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println("Error ngeload image di MenuView: " + e.getMessage());
         }
 
-        helveticaFont = new Font("Helvetica", Font.PLAIN, 14); //
+        helveticaFont = new Font("Helvetica", Font.PLAIN, 14);
         customHeaderTableFont = helveticaFont.deriveFont(Font.BOLD, 16f);
 
         JPanel mainPanel = new JPanel(new BorderLayout(0, 15)) {
@@ -113,7 +114,6 @@ public class MenuView extends JFrame {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(new Color(10, 12, 18, 50));
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), DATA_AREA_CORNER_RADIUS, DATA_AREA_CORNER_RADIUS);
-
                 g2.setColor(DATA_AREA_BORDER_COLOR);
                 g2.setStroke(new BasicStroke(2.5f));
                 g2.drawRoundRect(1, 1, getWidth() - 3, getHeight() - 3, DATA_AREA_CORNER_RADIUS, DATA_AREA_CORNER_RADIUS);
@@ -123,21 +123,35 @@ public class MenuView extends JFrame {
         dataAreaWithRoundedBorder.setOpaque(false);
         dataAreaWithRoundedBorder.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        String[] columnNames = {"Nama", "Tanggal Lahir", "Prediksi"};
-        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
-            @Override public boolean isCellEditable(int row, int column) { return column == 2; }
+        // Kolom di model: "Nama", "Tanggal Lahir", "id_data_hidden" (buat ID), "Prediksi" (buat tombol)
+        // "id_data_hidden" gak akan ditampilin di header, tapi nilainya ada di model tabel
+        String[] columnNamesForModel = {"Nama", "Tanggal Lahir", "id_data_hidden", "Prediksi"};
+        String[] columnNamesForHeader = {"Nama", "Tanggal Lahir", "Prediksi"};
+
+        DefaultTableModel tableModel = new DefaultTableModel(null, columnNamesForModel) { // Data awal null, kolom dari array
+            @Override public boolean isCellEditable(int row, int column) {
+                // Kolom "Prediksi" (indeks ke-3 di model, atau terakhir yg visible) bisa interaktif
+                return column == getColumnCount() -1; // Kolom terakhir di model, yg isinya tombol
+            }
+            // Sembunyikan kolom id_data_hidden dari tampilan
+            @Override public Class<?> getColumnClass(int columnIndex) {
+                if (columnIndex == 2 && getColumnName(columnIndex).equals("id_data_hidden")) return Object.class; // Atau tipe ID
+                return super.getColumnClass(columnIndex);
+            }
         };
         dataTable = new JTable(tableModel);
-        styleDataTable();
+        // Set header yg visible
+        dataTable.getTableHeader().setReorderingAllowed(false); // Biar gak bisa di-drag kolomnya
+
+        styleDataTable(columnNamesForHeader); // Kirim nama kolom buat header
 
         scrollPane = new JScrollPane(dataTable);
         scrollPane.setOpaque(false);
         scrollPane.getViewport().setOpaque(false);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
-        dataAreaWithRoundedBorder.add(dataTable.getTableHeader(), BorderLayout.NORTH); // Header di atas tabel
+        dataAreaWithRoundedBorder.add(dataTable.getTableHeader(), BorderLayout.NORTH);
         dataAreaWithRoundedBorder.add(scrollPane, BorderLayout.CENTER);
-
 
         centerContentPanel.add(dataAreaWithRoundedBorder, BorderLayout.CENTER);
         mainPanel.add(centerContentPanel, BorderLayout.CENTER);
@@ -166,12 +180,70 @@ public class MenuView extends JFrame {
         bottomButtonPanel.add(logoutButton);
         mainPanel.add(bottomButtonPanel, BorderLayout.SOUTH);
 
-        controller = new ControllerData(this); //
-        controller.showAllData(); //
+        controller = new ControllerData(this);
+        // Panggil showAllData() untuk isi tabel (controller akan handle ini)
+        // Pastikan ControllerData.showAllData() mengisi DefaultTableModel dengan benar,
+        // termasuk kolom "id_data_hidden"
+        controller.showAllData();
 
-        addButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Fitur Tambah Data Belum Tersedia", "Info", JOptionPane.INFORMATION_MESSAGE));
-        editButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Fitur Edit Data Belum Tersedia", "Info", JOptionPane.INFORMATION_MESSAGE));
-        deleteButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Fitur Delete Data Belum Tersedia", "Info", JOptionPane.INFORMATION_MESSAGE));
+
+        // Action Listeners
+        addButton.addActionListener(e -> {
+            // Buka AddView, kirim ID user yang login
+            new AddView(loggedInUser.getId(), this).setVisible(true);
+        });
+
+        editButton.addActionListener(e -> {
+            int selectedRow = dataTable.getSelectedRow();
+            if (selectedRow >= 0) {
+                // Ambil ModelData dari baris yang dipilih untuk dikirim ke EditView
+                // Ini asumsi ControllerData atau MenuView punya cara buat dapetin ModelData lengkap dari selectedRow
+                // Cara paling gampang: ControllerData.showAllData() itu ngisi List<ModelData> juga di MenuView
+                // atau DefaultTableModel lu itu ModelTable yang nyimpen List<ModelData>
+
+                // Contoh ambil ID data dari kolom tersembunyi (misal indeks ke-2 di model)
+                int idData = (Integer) dataTable.getModel().getValueAt(dataTable.convertRowIndexToModel(selectedRow), 2);
+                String nama = dataTable.getValueAt(selectedRow, 0).toString();
+                String tanggal = dataTable.getValueAt(selectedRow, 1).toString();
+
+                ModelData dataToEdit = new ModelData();
+                dataToEdit.setId_data(idData);
+                dataToEdit.setNama(nama);
+                dataToEdit.setTanggal(tanggal);
+                dataToEdit.setId_user(loggedInUser.getId()); // Kirim juga id_user
+
+                new EditView(dataToEdit, this).setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(this, "Pilih dulu data yang mau diedit, coj!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        deleteButton.addActionListener(e -> {
+            int selectedRow = dataTable.getSelectedRow();
+            if (selectedRow >= 0) {
+                String namaData = dataTable.getValueAt(selectedRow, 0).toString();
+                int idData = (Integer) dataTable.getModel().getValueAt(dataTable.convertRowIndexToModel(selectedRow), 2); // Ambil ID dari model
+
+                // Balik ke JOptionPane standar buat konfirmasi delete
+                int response = JOptionPane.showConfirmDialog(
+                        this,
+                        "Yakin mau ngehapus data persona '" + namaData + "'?",
+                        "Konfirmasi Hapus Data",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                );
+                if (response == JOptionPane.YES_OPTION) {
+                    System.out.println("User KONFIRM HAPUS data ID: " + idData + " Nama: " + namaData);
+                    // Panggil controller buat delete data
+                    // controller.deleteDataById(idData);
+                    // Setelah delete, panggil controller.showAllData() lagi buat refresh tabel
+                    // controller.showAllData(); // Contoh refresh
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Pilih dulu data yang mau dihapus, coj!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
         logoutButton.addActionListener(e -> {
             int response = JOptionPane.showConfirmDialog(this, "Yakin mau logout, bro?", "Logout Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
             if (response == JOptionPane.YES_OPTION) {
@@ -183,7 +255,25 @@ public class MenuView extends JFrame {
         setVisible(true);
     }
 
-    private void styleDataTable() {
+    // Method buat nge-refresh tabel setelah ada CRUD
+    public void refreshTableData() {
+        if (controller != null) {
+            controller.showAllData();
+        }
+    }
+
+
+    private void styleDataTable(String[] visibleColumnNames) {
+        // Sembunyikan kolom "id_data_hidden" dari tampilan view, tapi datanya tetep ada di model
+        if (dataTable.getColumnModel().getColumnCount() > 2 &&
+                dataTable.getColumnModel().getColumn(2).getHeaderValue().toString().equals("id_data_hidden")) {
+            dataTable.getColumnModel().getColumn(2).setMinWidth(0);
+            dataTable.getColumnModel().getColumn(2).setMaxWidth(0);
+            dataTable.getColumnModel().getColumn(2).setWidth(0);
+            dataTable.getColumnModel().getColumn(2).setPreferredWidth(0);
+        }
+
+
         dataTable.setFont(customHeaderTableFont.deriveFont(Font.PLAIN, 15f));
         dataTable.setForeground(TABLE_CELL_FONT_COLOR);
         dataTable.setOpaque(false);
@@ -191,7 +281,7 @@ public class MenuView extends JFrame {
         dataTable.setSelectionBackground(TABLE_SELECTION_BG_COLOR);
         dataTable.setRowHeight(35);
         dataTable.setShowGrid(false);
-        dataTable.setIntercellSpacing(new Dimension(0, 0)); //
+        dataTable.setIntercellSpacing(new Dimension(0, 0));
 
         JTableHeader tableHeader = dataTable.getTableHeader();
         tableHeader.setFont(customHeaderTableFont);
@@ -201,7 +291,18 @@ public class MenuView extends JFrame {
         tableHeader.setDefaultRenderer(new StyledHeaderRenderer(customHeaderTableFont, TEXT_COLOR_LIGHT));
         tableHeader.setReorderingAllowed(false);
 
+        // Set nama kolom header yang visible (karena modelnya punya kolom hidden)
+        // Ini agak tricky, karena model udah pake columnNamesForModel
+        // Cara yg lebih bener adalah modelnya cuma punya kolom visible,
+        // dan ID diambil dari List<ModelData> terpisah.
+        // Untuk sekarang, kita biarin JTable pake nama kolom dari model, dan yg hidden udah diset lebarnya 0.
+
         dataTable.setDefaultRenderer(Object.class, new TransparentTableCellRenderer(customHeaderTableFont.deriveFont(Font.PLAIN, 15f), TABLE_CELL_FONT_COLOR));
+
+        // Pastikan nama kolom buat tombol "Lihat" itu "Prediksi" (sesuai columnNamesForHeader)
+        // atau indeks kolom terakhir yang visible.
+        // Jika modelnya pake {"Nama", "Tanggal Lahir", "id_data_hidden", "Prediksi"}
+        // maka kolom "Prediksi" ada di indeks 3.
         dataTable.getColumn("Prediksi").setCellRenderer(new ButtonTableRenderer("LIHAT"));
         dataTable.getColumn("Prediksi").setCellEditor(new ButtonTableEditor(new JCheckBox(), "LIHAT", this));
     }
@@ -229,7 +330,6 @@ public class MenuView extends JFrame {
         return separator;
     }
 
-    // Inner class buat renderer header tabel yang di-style
     static class StyledHeaderRenderer extends DefaultTableCellRenderer {
         private Font headerFont;
         private Color headerColor;
@@ -244,21 +344,19 @@ public class MenuView extends JFrame {
             JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             label.setFont(headerFont);
             label.setForeground(headerColor);
-            label.setOpaque(false); // KUNCI biar transparan
-            label.setBackground(new Color(0,0,0,0)); // Paksa background transparan
-            label.setBorder(this.getBorder()); // Re-apply border padding kita
+            label.setOpaque(false);
+            label.setBackground(new Color(0,0,0,0));
+            label.setBorder(this.getBorder());
             return label;
         }
     }
 
-    // Inner class buat renderer sel tabel transparan
     static class TransparentTableCellRenderer extends DefaultTableCellRenderer {
         private Font cellFont;
         private Color cellColor;
         public TransparentTableCellRenderer(Font font, Color color) {
             this.cellFont = font;
             this.cellColor = color;
-            // setOpaque(false); // Udah di-handle di getTableCellRendererComponent
         }
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -273,12 +371,11 @@ public class MenuView extends JFrame {
             }
             if (value != null) setText(value.toString()); else setText("");
             setHorizontalAlignment(SwingConstants.CENTER);
-            setOpaque(false); // Pastikan JLabel (this) dari DefaultTableCellRenderer jadi transparan
+            setOpaque(false);
             return this;
         }
     }
 
-    // Inner class buat renderer tombol "LIHAT" di tabel
     class ButtonTableRenderer extends JButton implements TableCellRenderer {
         public ButtonTableRenderer(String text) {
             super(text);
@@ -302,13 +399,12 @@ public class MenuView extends JFrame {
         }
     }
 
-    // Inner class buat editor tombol "LIHAT" di tabel
     class ButtonTableEditor extends DefaultCellEditor {
         protected JButton button;
         private boolean pushed;
         private int editingRow;
         private JFrame parentFrame;
-        private String labelButton; // Buat nyimpen teks tombol
+        private String labelButton;
 
         public ButtonTableEditor(JCheckBox checkBox, String text, JFrame parent) {
             super(checkBox);
@@ -343,13 +439,22 @@ public class MenuView extends JFrame {
         @Override
         public Object getCellEditorValue() {
             if (pushed) {
-                String namaDiRow = "";
-                if (dataTable.getRowCount() > editingRow && dataTable.getColumnCount() > 0) {
-                    Object namaValue = dataTable.getValueAt(editingRow, 0);
-                    if (namaValue != null) namaDiRow = namaValue.toString();
-                }
-                System.out.println("Tombol 'Lihat' diklik untuk: " + namaDiRow);
-                JOptionPane.showMessageDialog(button, "Menampilkan detail prediksi untuk: " + namaDiRow, "Info Prediksi", JOptionPane.INFORMATION_MESSAGE);
+                // Ambil ID data dari kolom tersembunyi di model
+                int idData = (Integer) dataTable.getModel().getValueAt(dataTable.convertRowIndexToModel(editingRow), 2); // Indeks kolom ID_Data (hidden)
+                String namaDiRow = dataTable.getValueAt(editingRow, 0).toString(); // Ambil nama dari kolom visible
+                String tanggalLahirDiRow = dataTable.getValueAt(editingRow, 1).toString(); // Ambil tanggal dari kolom visible
+
+                System.out.println("Tombol 'Lihat' diklik untuk idData: " + idData + ", Nama: " + namaDiRow);
+
+                // Di sini lu perlu logic buat ngambil teksPrediksi dari database pake idData
+                // Misalnya, bikin method di ControllerData atau DAO baru:
+                // String teksPrediksi = controller.getPrediksiText(idData);
+                String teksPrediksi = "Ini adalah contoh teks prediksi untuk " + namaDiRow + ". Implementasi fetching dari DB diperlukan."; // Placeholder
+
+                // ImageIcon gambarZodiak = controller.getZodiakImage(idData); // Placeholder
+                ImageIcon gambarZodiak = null; // Ganti dengan logic ambil gambar zodiak
+
+                new PrediksiView(namaDiRow, tanggalLahirDiRow, teksPrediksi, gambarZodiak).setVisible(true);
             }
             pushed = false;
             return this.labelButton;
@@ -358,13 +463,13 @@ public class MenuView extends JFrame {
         @Override protected void fireEditingStopped() { super.fireEditingStopped(); }
     }
 
-    public int getIdUser(){ return loggedInUser.getId(); } //
-    public JTable getTableData(){ return dataTable; } //
+    public int getIdUser(){ return loggedInUser.getId(); }
+    public JTable getTableData(){ return dataTable; }
 
     public static void main(String[] args) {
         try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }
         catch (Exception e) { e.printStackTrace(); }
-        ModelUser dummyUser = new ModelUser(); //
+        ModelUser dummyUser = new ModelUser();
         dummyUser.setId(1);
         dummyUser.setNama("IRHAM UHUY");
         SwingUtilities.invokeLater(() -> new MenuView(dummyUser).setVisible(true));
