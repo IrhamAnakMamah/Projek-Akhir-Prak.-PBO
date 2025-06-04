@@ -129,7 +129,6 @@ public class EditView extends JFrame {
         cancelButton.addActionListener(e -> dispose());
         // ini ya
         controller = new ControllerData(this);
-        controller.updateData(13);
 
         saveButton = new JButton("SAVE");
         styleTextLikeButton(saveButton);
@@ -151,15 +150,17 @@ public class EditView extends JFrame {
             // updatedData.setPrediksi(...); // Jika masih ada field prediksi di ModelData
 
             // Panggil ControllerData buat update
-            // boolean success = parentMenuView.controller.updateData(updatedData);
+            boolean success = controller.updateData(idDataToEdit);
 
             // SIMULASI UPDATE (GANTI DENGAN LOGIC CONTROLLER ASLI)
             System.out.println("Simulating UPDATE data: ID Data=" + idDataToEdit + ", Nama=" + nama + ", Tanggal=" + tanggal);
-            boolean success = true; // Anggap sukses
+//            boolean success = true; // Anggap sukses
 
             if (success) {
                 JOptionPane.showMessageDialog(this, "Data Persona berhasil diupdate!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
-                parentMenuView.refreshTableData(); // Refresh tabel di MenuView
+                parentMenuView.refreshTableData();
+                new PrediksiView(updatedData);
+                // Refresh tabel di MenuView
                 dispose();
             } else {
                 JOptionPane.showMessageDialog(this, "Gagal mengupdate data!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -203,11 +204,11 @@ public class EditView extends JFrame {
     }
 
     public String getInputNama(){
-        return "Ham";
+        return namaField.getText();
     }
 
     public String getInputTanggal(){
-        return "2005-08-05";
+        return tanggalField.getText();
     }
     public static void main(String[] args) {
         try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }

@@ -140,21 +140,20 @@ public class AddView extends JFrame {
                 JOptionPane.showMessageDialog(this, "Nama dan Tanggal Lahir tidak boleh kosong!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            // Validasi format tanggal (YYYY-MM-DD) bisa ditambah di sini
-            // if (!tanggal.matches("\\d{4}-\\d{2}-\\d{2}")) {
-            //    JOptionPane.showMessageDialog(this, "Format tanggal salah! Gunakan YYYY-MM-DD.", "Error", JOptionPane.ERROR_MESSAGE);
-            //    return;
-            // }
+//             Validasi format tanggal (YYYY-MM-DD) bisa ditambah di sini
+             if (!tanggal.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                JOptionPane.showMessageDialog(this, "Format tanggal salah! Gunakan YYYY-MM-DD.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+             }
 
             ModelData newData = new ModelData();
-            newData.setId_user(idCurrentUser);
-            newData.setNama(nama);
-            newData.setTanggal(tanggal);
             // Kolom prediksi di tabel data SQL versi lama lu ada, tapi di versi baru gak ada
             // Jika Prediksi (persona_text) digenerate otomatis atau di-link nanti, biarin kosong
             // newData.setPrediksi("Belum ada prediksi"); // Sesuai ModelData jika masih ada field prediksi
 
             // Panggil ControllerData buat insert
+            controller = new ControllerData(this);
+            newData = controller.insertData(idUser);
             // Asumsi ControllerData punya method insertData(ModelData data)
             // boolean success = parentMenuView.controller.insertData(newData); // Panggil controller dari parent
 
@@ -164,7 +163,7 @@ public class AddView extends JFrame {
 
             if (success) {
                 JOptionPane.showMessageDialog(this, "Data Persona berhasil ditambahkan!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
-                parentMenuView.refreshTableData(); // Refresh tabel di MenuView
+                new PrediksiView(newData); // Refresh tabel di MenuView
                 dispose(); // Tutup AddView
             } else {
                 JOptionPane.showMessageDialog(this, "Gagal menambahkan data!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -208,11 +207,11 @@ public class AddView extends JFrame {
     }
 
     public String getInputNama(){
-        return "Irham";
+        return namaField.getText();
     }
 
     public String getInputTanggal(){
-        return "2005-08-05";
+        return tanggalField.getText();
     }
 
     public static void main(String[] args) {

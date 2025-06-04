@@ -2,6 +2,8 @@ package View.Menu; // Sesuaikan package
 
 // import Model.Data.ModelData; // Kalo mau nerima ModelData langsung
 import Model.Data.DAOData;
+import Model.Data.ModelData;
+import Model.Data.ModelPrediksi;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -27,11 +29,17 @@ public class PrediksiView extends JFrame {
     private final Color TEXT_COLOR_BUTTON_HOVER = new Color(170, 200, 255);
     private final Color ZODIAC_PANEL_BORDER_COLOR = new Color(200, 160, 80, 220);
     private final int ZODIAC_PANEL_CORNER_RADIUS = 25;
+    ModelPrediksi model;
+    String nama, tanggalLahir, teksPrediksiFinal;
+    ImageIcon gambarZodiakFinal;
 
     // Constructor nerima data yang udah siap tampil
-    public PrediksiView(int id_data) {
-        String nama, tanggalLahir, teksPrediksiFinal;
-        ImageIcon gambarZodiakFinal;
+    public PrediksiView(ModelData data) {
+        DAOData dao = new DAOData();
+        model = dao.getData(data.getId_data());
+        nama = data.getNama();
+        tanggalLahir = data.getTanggal();
+        teksPrediksiFinal = model.getHuruf() + model.getZodiac();
         setTitle("Hasil Prediksi Persona");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(650, 750);
@@ -220,6 +228,5 @@ public class PrediksiView extends JFrame {
         String tgl = "1990-04-25";
         String prediksi = "Hari ini adalah hari yang penuh tantangan namun juga penuh peluang..."; // Teks panjang
         ImageIcon zodiakImg = null;
-        SwingUtilities.invokeLater(() -> new PrediksiView(nama, tgl, prediksi, zodiakImg).setVisible(true));
     }
 }

@@ -13,4 +13,5 @@ public interface InterfaceDAOData {
     public void insertPrediksi(int idData, int kode);
     public void deletePrediksi(int idData);
     public ModelPrediksi getData(int idPrediksi);
+    public int getIdData(String nama);
 }

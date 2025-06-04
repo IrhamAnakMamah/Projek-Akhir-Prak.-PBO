@@ -12,6 +12,28 @@ import java.util.List;
 public class DAOData implements InterfaceDAOData{
 
     @Override
+    public int getIdData(String nama) {
+        int id = 0;
+        try{
+            String query = "SELECT * FROM data WHERE nama=?;";
+            PreparedStatement statement;
+            statement = Connector.Connect().prepareStatement(query);
+            statement.setString(1, nama);
+            ResultSet rs = statement.executeQuery();
+
+            while(rs.next()){
+                id = rs.getInt("id_data");
+                System.out.println("Di get : " + id);
+            }
+            statement.close();
+            return id;
+        }catch (Exception e){
+            System.out.println("Error : " + e.getLocalizedMessage());
+        }
+        return id;
+    }
+
+    @Override
     public ModelPrediksi getData(int idData){
         ModelPrediksi modelPrediksi = new ModelPrediksi();
         try{

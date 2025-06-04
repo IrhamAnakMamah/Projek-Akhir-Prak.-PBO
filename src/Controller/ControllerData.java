@@ -48,7 +48,7 @@ public class ControllerData {
     }
 
     // untuk tanggalnya sendiri itu di format dari input data
-    public void insertData(int idUser) {
+    public ModelData insertData(int idUser) {
         try{
             ModelData data = new ModelData();
             String nama = halamanAdd.getInputNama();
@@ -63,19 +63,20 @@ public class ControllerData {
             int id_data = daodata.cekIdDataAfterInput(data);
             data.setId_data(id_data);
             insertPrediksi(data);
+            return data;
         }catch(Exception e){
             System.out.println("Error : " + e.getLocalizedMessage());
         }
-
+        return null;
     }
 
-    public void updateData(int id_data) {
+    public boolean updateData(int id_data) {
         try{
             ModelData data = new ModelData();
             String nama = halamanEdit.getInputNama();
             String tanggal = halamanEdit.getInputTanggal();
             if ("".equals(nama) || "".equals(tanggal)) {
-                throw new Exception("Nama atau NIM tidak boleh kosong!");
+                throw new Exception("Nama atau Tanggal tidak boleh kosong!");
             }
             data.setNama(nama);
             data.setTanggal(tanggal);
@@ -83,9 +84,11 @@ public class ControllerData {
 
             daodata.update(data);
             insertPrediksi(data);
+            return true;
         } catch (Exception e) {
             System.out.println("Error : " + e.getLocalizedMessage());
         }
+        return false;
     }
 
     public void insertPrediksi(ModelData data) {
