@@ -181,7 +181,7 @@ public class MenuView extends JFrame {
         // Action Listeners
         // WARNING : ACTION LISTENERS
         addButton.addActionListener(e -> {
-            new AddView();
+            new AddView(user.getId());
             dispose();
         });
         editButton.addActionListener(e -> { /* ... */ });
