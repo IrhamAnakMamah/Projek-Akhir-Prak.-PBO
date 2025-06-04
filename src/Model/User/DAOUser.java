@@ -54,7 +54,7 @@ public class DAOUser implements InterfaceDAOUser{
 
                 users.add(usr);
             }
-
+            System.out.println("Apalah bang");
             statement.close();
         }catch(Exception e){
             System.out.println("Error: " + e.getLocalizedMessage());
