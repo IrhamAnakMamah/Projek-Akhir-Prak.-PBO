@@ -69,17 +69,17 @@ public class ControllerData {
 
     }
 
-    public void updateData(int idUser) {
+    public void updateData(int id_data) {
         try{
             ModelData data = new ModelData();
-            String nama = halamanAdd.getInputNama();
-            String tanggal = halamanAdd.getInputTanggal();
+            String nama = halamanEdit.getInputNama();
+            String tanggal = halamanEdit.getInputTanggal();
             if ("".equals(nama) || "".equals(tanggal)) {
                 throw new Exception("Nama atau NIM tidak boleh kosong!");
             }
-            data.setId_data(idUser);
             data.setNama(nama);
             data.setTanggal(tanggal);
+            data.setId_data(id_data);
 
             daodata.update(data);
             insertPrediksi(data);

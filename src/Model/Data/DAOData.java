@@ -12,6 +12,42 @@ import java.util.List;
 public class DAOData implements InterfaceDAOData{
 
     @Override
+    public ModelPrediksi getData(int idData){
+        ModelPrediksi modelPrediksi = new ModelPrediksi();
+        try{
+            String query = "SELECT * FROM prediksi WHERE id_data=?;";
+            PreparedStatement statement;
+            statement = Connector.Connect().prepareStatement(query);
+            statement.setInt(1, idData);
+            ResultSet rs = statement.executeQuery();
+            int i = 0;
+            while(rs.next()){
+                int id = rs.getInt("id_referensi");
+                String masuk = "SELECT persona_text FROM referensi WHERE id_referensi=?;";
+                PreparedStatement statement2;
+                statement2 = Connector.Connect().prepareStatement(masuk);
+                statement2.setInt(1, id);
+                ResultSet rs2 = statement2.executeQuery();
+                while(rs2.next()){
+                    String text = rs2.getString("persona_text");
+                    if(i == 0){
+                         modelPrediksi.setZodiac(text);
+                    }else{
+                        modelPrediksi.setHuruf(text);
+                    }
+                }
+                statement2.close();
+                i++;
+            }
+            statement.close();
+            return modelPrediksi;
+        } catch (Exception e) {
+            System.out.println("Error : " + e.getLocalizedMessage());
+        }
+        return null;
+    }
+
+    @Override
     public void insertPrediksi(int idData, int kode) {
         try{
             String Query = "INSERT INTO prediksi(id_data, id_referensi) VALUES(?,?);";

@@ -12,4 +12,5 @@ public interface InterfaceDAOData {
     public void insertHuruf(int idData, char huruf);
     public void insertPrediksi(int idData, int kode);
     public void deletePrediksi(int idData);
+    public ModelPrediksi getData(int idPrediksi);
 }
