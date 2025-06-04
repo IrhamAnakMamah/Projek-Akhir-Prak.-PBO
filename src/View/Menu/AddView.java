@@ -14,6 +14,8 @@ import java.awt.event.MouseEvent;
 
 public class AddView extends JFrame {
 
+    ControllerData controller;
+
     private JTextField namaField;
     private JTextField tanggalField;
     private JButton addButton, cancelButton;
@@ -121,6 +123,9 @@ public class AddView extends JFrame {
         bottomPanel.setOpaque(false);
         bottomPanel.setBorder(new EmptyBorder(10,0,0,0));
 
+        controller = new ControllerData(this);
+        controller.insertData(idUser);
+
         cancelButton = new JButton("CANCEL");
         styleTextLikeButton(cancelButton);
         cancelButton.addActionListener(e -> dispose());
@@ -200,6 +205,14 @@ public class AddView extends JFrame {
             @Override public void mouseEntered(MouseEvent e) { button.setForeground(TEXT_COLOR_BUTTON_HOVER); }
             @Override public void mouseExited(MouseEvent e) { button.setForeground(TEXT_COLOR_LIGHT); }
         });
+    }
+
+    public String getInputNama(){
+        return "Irham";
+    }
+
+    public String getInputTanggal(){
+        return "2005-08-05";
     }
 
     public static void main(String[] args) {

@@ -13,6 +13,8 @@ import java.awt.event.MouseEvent;
 
 public class EditView extends JFrame {
 
+    ControllerData controller;
+
     private JTextField namaField;
     private JTextField tanggalField;
     private JButton saveButton, cancelButton;
@@ -125,6 +127,9 @@ public class EditView extends JFrame {
         cancelButton = new JButton("CANCEL");
         styleTextLikeButton(cancelButton);
         cancelButton.addActionListener(e -> dispose());
+        // ini ya
+        controller = new ControllerData(this);
+        controller.updateData(13);
 
         saveButton = new JButton("SAVE");
         styleTextLikeButton(saveButton);
@@ -197,6 +202,13 @@ public class EditView extends JFrame {
         });
     }
 
+    public String getInputNama(){
+        return "Ham";
+    }
+
+    public String getInputTanggal(){
+        return "2005-08-05";
+    }
     public static void main(String[] args) {
         try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }
         catch (Exception e) { e.printStackTrace(); }

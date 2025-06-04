@@ -2,7 +2,8 @@ package Model.Data;
 
 public class ModelData {
     private int id_data,id_user;
-    private String tanggal,nama,prediksi;
+    private String tanggal,nama;
+    private String prediksi;
 
     public int getId_data() {
         return id_data;

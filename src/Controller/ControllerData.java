@@ -9,6 +9,8 @@ import View.Menu.EditView;
 import View.Menu.MenuView;
 import View.Menu.PrediksiView;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class ControllerData {
@@ -31,11 +33,11 @@ public class ControllerData {
         this.daodata = new DAOData();
     }
     public ControllerData(AddView halamanAdd) {
-        this.halamanAdd = ControllerData.this.halamanAdd;
+        this.halamanAdd = halamanAdd;
         this.daodata = new DAOData();
     }
     public ControllerData(PrediksiView halamanPrediksi) {
-        this.halamanPrediksi = ControllerData.this.halamanPrediksi;
+        this.halamanPrediksi = halamanPrediksi;
         this.daodata = new DAOData();
     }
 
@@ -45,5 +47,93 @@ public class ControllerData {
         halamanMenu.getTableData().setModel(table);
     }
 
+    // untuk tanggalnya sendiri itu di format dari input data
+    public void insertData(int idUser) {
+        try{
+            ModelData data = new ModelData();
+            String nama = halamanAdd.getInputNama();
+            String tanggal = halamanAdd.getInputTanggal();
+            if ("".equals(nama) || "".equals(tanggal)) {
+                throw new Exception("Nama atau Tanggal tidak boleh kosong!");
+            }
+            data.setNama(nama);
+            data.setTanggal(tanggal);
+            daodata.insert(data, idUser);
+
+            int id_data = daodata.cekIdDataAfterInput(data);
+            data.setId_data(id_data);
+            insertPrediksi(data);
+        }catch(Exception e){
+            System.out.println("Error : " + e.getLocalizedMessage());
+        }
+
+    }
+
+    public void updateData(int id_data) {
+        try{
+            ModelData data = new ModelData();
+            String nama = halamanEdit.getInputNama();
+            String tanggal = halamanEdit.getInputTanggal();
+            if ("".equals(nama) || "".equals(tanggal)) {
+                throw new Exception("Nama atau NIM tidak boleh kosong!");
+            }
+            data.setNama(nama);
+            data.setTanggal(tanggal);
+            data.setId_data(id_data);
+
+            daodata.update(data);
+            insertPrediksi(data);
+        } catch (Exception e) {
+            System.out.println("Error : " + e.getLocalizedMessage());
+        }
+    }
+
+    public void insertPrediksi(ModelData data) {
+        try{
+            int day = 0;
+            int month = 0;
+            String zodiac = "";
+            String nama_data = data.getNama();
+            char huruf_awal = nama_data.charAt(0);
+            if(huruf_awal >= 'a' && huruf_awal <= 'z'){
+                String tes = String.valueOf(huruf_awal).toUpperCase();
+                huruf_awal = tes.charAt(0);
+            }
+
+            String tanggalLahirStr = data.getTanggal();
+
+            if (tanggalLahirStr.matches("\\d{4}-\\d{2}-\\d{2}")) { // yyyy-MM-dd
+                LocalDate date = LocalDate.parse(tanggalLahirStr, DateTimeFormatter.ISO_LOCAL_DATE);
+                day = date.getDayOfMonth();
+                month = date.getMonthValue();
+            } else if (tanggalLahirStr.matches("\\d{2}-\\d{2}-\\d{4}")) { // dd-MM-yyyy
+                LocalDate date = LocalDate.parse(tanggalLahirStr, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                day = date.getDayOfMonth();
+                month = date.getMonthValue();
+            } else if (tanggalLahirStr.matches("\\d{2}-\\d{2}")) { // dd-MM (jika hanya ini yang diinput)
+                String[] parts = tanggalLahirStr.split("-");
+                day = Integer.parseInt(parts[0]);
+                month = Integer.parseInt(parts[1]);
+            }
+
+            if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) zodiac =  "Aquarius";
+            if ((month == 2 && day >= 19) || (month == 3 && day <= 20)) zodiac =  "Pisces";
+            if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) zodiac =  "Aries";
+            if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) zodiac =  "Taurus";
+            if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) zodiac =  "Gemini";
+            if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) zodiac =  "Cancer";
+            if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) zodiac =  "Leo";
+            if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) zodiac =  "Virgo";
+            if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) zodiac =  "Libra";
+            if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) zodiac =  "Scorpio";
+            if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) zodiac =  "Sagittarius";
+            if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) zodiac =  "Capricorn";
+
+            daodata.insertZodiac(data.getId_data(), zodiac);
+            daodata.insertHuruf(data.getId_data(), huruf_awal);
+        } catch (Exception e) {
+            System.out.println("Error : " + e.getLocalizedMessage());
+        }
+    }
 
 }
