@@ -9,8 +9,7 @@ public class PlayMusic implements Runnable {
     private Clip clip;
     String link;
     public PlayMusic() {
-        link = "C:\\Users\\ASUS\\IdeaProjects\\Projek-Akhir-Prak.-PBO\\src\\Main\\background.wav";
-
+        link = "D:\\Kuliah\\Semester 4\\Prak. PBO\\Projek_Akhir\\src\\Main\\background.wav";
     }
 
     @Override
