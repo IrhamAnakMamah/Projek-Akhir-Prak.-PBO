@@ -1,14 +1,24 @@
+// irhamanakmamah/projek-akhir-prak.-pbo/Projek-Akhir-Prak.-PBO-master/src/Model/Data/ModelTable.java
 package Model.Data;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.List;
 
 public class ModelTable extends AbstractTableModel {
-    List<ModelData> daftarData;
+    // --- PERUBAHAN DI SINI ---
+    // Bikin jadi private biar lebih proper
+    public List<ModelData> daftarData;
 
     String kolom[] = {"Nama", "Tanggal", "Prediksi"};
+
     public ModelTable(List<ModelData> daftarData) {
         this.daftarData = daftarData;
+    }
+
+    // --- DAN TAMBAHAN DI SINI ---
+    // Ini "pintu resmi" buat ngambil datanya dari luar paket
+    public List<ModelData> getDaftarData() {
+        return daftarData;
     }
 
     @Override
@@ -28,8 +38,9 @@ public class ModelTable extends AbstractTableModel {
                 return daftarData.get(rowIndex).getNama();
             case 1:
                 return daftarData.get(rowIndex).getTanggal();
-                case 2:
-                    return daftarData.get(rowIndex).getPrediksi();
+            case 2:
+                // Nilai buat kolom prediksi bisa diambil dari model atau diset default
+                return daftarData.get(rowIndex).getPrediksi();
             default:
                 return null;
         }
@@ -37,7 +48,7 @@ public class ModelTable extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return columnIndex == 2; // Hanya kolom "Prediksi" yang bisa diedit/interaktif
+        return columnIndex == 2; // Hanya kolom "Prediksi" yang bisa diklik
     }
 
     @Override

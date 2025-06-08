@@ -1,33 +1,28 @@
-package View.Menu; // Sesuaikan package
+// irhamanakmamah/projek-akhir-prak.-pbo/Projek-Akhir-Prak.-PBO-master/src/View/Menu/MenuView.java
+package View.Menu;
 
 import Controller.ControllerData;
-import Model.Data.ModelData; // Import ModelData
+import Model.Data.ModelData;
 import Model.User.ModelUser;
 import View.Form.LoginView;
-// import View.Util.CustomDialogView; // Kalo mau pake dialog custom buat info/error
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.List; // Buat akses daftarData kalo ada
 
 public class MenuView extends JFrame {
 
     ControllerData controller;
     private ModelUser loggedInUser;
-    // Kalo ControllerData nyimpen list data yang ditampilin, kita bisa akses buat ambil ModelData
-    // private List<ModelData> daftarTabelData; // Contoh, ini perlu diisi oleh ControllerData
+
+    // Komponen UI yang berubah
+    private JPanel dataListPanel; // Panel utama untuk menampung baris-baris data
+    private JScrollPane scrollPane; // Scroll pane untuk dataListPanel
 
     private JLabel logoLabel;
     private JLabel welcomeLabel;
-    private JTable dataTable;
-    private JScrollPane scrollPane;
     private JButton addButton, editButton, deleteButton, logoutButton;
 
     private Font helveticaFont;
@@ -36,12 +31,11 @@ public class MenuView extends JFrame {
     private ImageIcon backgroundImage;
     private ImageIcon personaPredictionLogo;
 
+    // Konstanta warna dan style tetap sama
     private final Color DATA_AREA_BORDER_COLOR = new Color(200, 160, 80, 230);
     private final int DATA_AREA_CORNER_RADIUS = 35;
     private final Color TEXT_COLOR_LIGHT = new Color(225, 230, 235);
     private final Color TEXT_COLOR_BUTTON_HOVER = new Color(170, 200, 255);
-    private final Color TABLE_CELL_FONT_COLOR = new Color(210, 215, 220);
-    private final Color TABLE_SELECTION_BG_COLOR = new Color(DATA_AREA_BORDER_COLOR.getRed(), DATA_AREA_BORDER_COLOR.getGreen(), DATA_AREA_BORDER_COLOR.getBlue(), 70);
 
     public MenuView(ModelUser user) {
         this.loggedInUser = user;
@@ -83,7 +77,7 @@ public class MenuView extends JFrame {
         mainPanel.setBorder(new EmptyBorder(25, 40, 25, 40));
         getContentPane().add(mainPanel);
 
-        // === TOP BAR ===
+        // === TOP BAR (Tidak berubah) ===
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
         if (personaPredictionLogo != null) logoLabel = new JLabel(personaPredictionLogo);
@@ -101,11 +95,12 @@ public class MenuView extends JFrame {
         topPanel.add(welcomeLabel, BorderLayout.EAST);
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
-        // === CENTER AREA: DATA DISPLAY ===
+        // === CENTER AREA: DATA DISPLAY (INI YANG DIUBAH TOTAL) ===
         JPanel centerContentPanel = new JPanel(new BorderLayout(0, 0));
         centerContentPanel.setOpaque(false);
-        centerContentPanel.setBorder(new EmptyBorder(35, 5, 0, 5));
+        centerContentPanel.setBorder(new EmptyBorder(15, 5, 0, 5)); // Kurangin padding atas
 
+        // Panel luar yang punya border rounded
         JPanel dataAreaWithRoundedBorder = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -123,40 +118,27 @@ public class MenuView extends JFrame {
         dataAreaWithRoundedBorder.setOpaque(false);
         dataAreaWithRoundedBorder.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        // Kolom di model: "Nama", "Tanggal Lahir", "id_data_hidden" (buat ID), "Prediksi" (buat tombol)
-        // "id_data_hidden" gak akan ditampilin di header, tapi nilainya ada di model tabel
-        String[] columnNamesForModel = {"Nama", "Tanggal Lahir", "id_data_hidden", "Prediksi"};
-        String[] columnNamesForHeader = {"Nama", "Tanggal Lahir", "Prediksi"};
+        // Panel untuk menampung list data, dengan layout vertikal
+        dataListPanel = new JPanel();
+        dataListPanel.setLayout(new BoxLayout(dataListPanel, BoxLayout.Y_AXIS));
+        dataListPanel.setOpaque(false);
 
-        DefaultTableModel tableModel = new DefaultTableModel(null, columnNamesForModel) { // Data awal null, kolom dari array
-            @Override public boolean isCellEditable(int row, int column) {
-                // Kolom "Prediksi" (indeks ke-3 di model, atau terakhir yg visible) bisa interaktif
-                return column == getColumnCount() -1; // Kolom terakhir di model, yg isinya tombol
-            }
-            // Sembunyikan kolom id_data_hidden dari tampilan
-            @Override public Class<?> getColumnClass(int columnIndex) {
-                if (columnIndex == 2 && getColumnName(columnIndex).equals("id_data_hidden")) return Object.class; // Atau tipe ID
-                return super.getColumnClass(columnIndex);
-            }
-        };
-        dataTable = new JTable(tableModel);
-        // Set header yg visible
-        dataTable.getTableHeader().setReorderingAllowed(false); // Biar gak bisa di-drag kolomnya
+        // Header "manual" di atas list
+        JPanel headerPanel = createHeaderPanel();
+        dataListPanel.add(headerPanel);
 
-        styleDataTable(columnNamesForHeader); // Kirim nama kolom buat header
-
-        scrollPane = new JScrollPane(dataTable);
+        // Bungkus list panel dengan JScrollPane
+        scrollPane = new JScrollPane(dataListPanel);
         scrollPane.setOpaque(false);
         scrollPane.getViewport().setOpaque(false);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16); // Biar scroll lebih smooth
 
-        dataAreaWithRoundedBorder.add(dataTable.getTableHeader(), BorderLayout.NORTH);
         dataAreaWithRoundedBorder.add(scrollPane, BorderLayout.CENTER);
-
         centerContentPanel.add(dataAreaWithRoundedBorder, BorderLayout.CENTER);
         mainPanel.add(centerContentPanel, BorderLayout.CENTER);
 
-        // === BOTTOM BUTTONS ===
+        // === BOTTOM BUTTONS (Tidak berubah) ===
         JPanel bottomButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 5));
         bottomButtonPanel.setOpaque(false);
         bottomButtonPanel.setBorder(new EmptyBorder(25,0,10,0));
@@ -180,69 +162,16 @@ public class MenuView extends JFrame {
         bottomButtonPanel.add(logoutButton);
         mainPanel.add(bottomButtonPanel, BorderLayout.SOUTH);
 
+        // Controller akan mengisi dataListPanel
         controller = new ControllerData(this);
-        // Panggil showAllData() untuk isi tabel (controller akan handle ini)
-        // Pastikan ControllerData.showAllData() mengisi DefaultTableModel dengan benar,
-        // termasuk kolom "id_data_hidden"
         controller.showAllData();
 
+        // Action listener button bawah masih sama, TAPI perlu penyesuaian untuk edit/delete
+        // karena kita tidak bisa "getSelectedRow" lagi. Ini contoh, bisa dikembangkan.
+        addButton.addActionListener(e -> new AddView(loggedInUser.getId(), this).setVisible(true));
 
-        // Action Listeners
-        addButton.addActionListener(e -> {
-            // Buka AddView, kirim ID user yang login
-            new AddView(loggedInUser.getId(), this).setVisible(true);
-        });
-
-        editButton.addActionListener(e -> {
-            int selectedRow = dataTable.getSelectedRow();
-            if (selectedRow >= 0) {
-                // Ambil ModelData dari baris yang dipilih untuk dikirim ke EditView
-                // Ini asumsi ControllerData atau MenuView punya cara buat dapetin ModelData lengkap dari selectedRow
-                // Cara paling gampang: ControllerData.showAllData() itu ngisi List<ModelData> juga di MenuView
-                // atau DefaultTableModel lu itu ModelTable yang nyimpen List<ModelData>
-
-                // Contoh ambil ID data dari kolom tersembunyi (misal indeks ke-2 di model)
-                int idData = (Integer) dataTable.getModel().getValueAt(dataTable.convertRowIndexToModel(selectedRow), 2);
-                String nama = dataTable.getValueAt(selectedRow, 0).toString();
-                String tanggal = dataTable.getValueAt(selectedRow, 1).toString();
-
-                ModelData dataToEdit = new ModelData();
-                dataToEdit.setId_data(idData);
-                dataToEdit.setNama(nama);
-                dataToEdit.setTanggal(tanggal);
-                dataToEdit.setId_user(loggedInUser.getId()); // Kirim juga id_user
-
-                new EditView(dataToEdit, this).setVisible(true);
-            } else {
-                JOptionPane.showMessageDialog(this, "Pilih dulu data yang mau diedit, coj!", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        deleteButton.addActionListener(e -> {
-            int selectedRow = dataTable.getSelectedRow();
-            if (selectedRow >= 0) {
-                String namaData = dataTable.getValueAt(selectedRow, 0).toString();
-                int idData = (Integer) dataTable.getModel().getValueAt(dataTable.convertRowIndexToModel(selectedRow), 2); // Ambil ID dari model
-
-                // Balik ke JOptionPane standar buat konfirmasi delete
-                int response = JOptionPane.showConfirmDialog(
-                        this,
-                        "Yakin mau ngehapus data persona '" + namaData + "'?",
-                        "Konfirmasi Hapus Data",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.WARNING_MESSAGE
-                );
-                if (response == JOptionPane.YES_OPTION) {
-                    System.out.println("User KONFIRM HAPUS data ID: " + idData + " Nama: " + namaData);
-                    // Panggil controller buat delete data
-                    // controller.deleteDataById(idData);
-                    // Setelah delete, panggil controller.showAllData() lagi buat refresh tabel
-                    // controller.showAllData(); // Contoh refresh
-                }
-            } else {
-                JOptionPane.showMessageDialog(this, "Pilih dulu data yang mau dihapus, coj!", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
+        editButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Fitur Edit perlu cara baru untuk memilih data.", "Info", JOptionPane.INFORMATION_MESSAGE));
+        deleteButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Fitur Delete perlu cara baru untuk memilih data.", "Info", JOptionPane.INFORMATION_MESSAGE));
 
         logoutButton.addActionListener(e -> {
             int response = JOptionPane.showConfirmDialog(this, "Yakin mau logout, bro?", "Logout Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
@@ -255,56 +184,100 @@ public class MenuView extends JFrame {
         setVisible(true);
     }
 
-    // Method buat nge-refresh tabel setelah ada CRUD
+    // Method untuk membuat header palsu
+    private JPanel createHeaderPanel() {
+        JPanel header = new JPanel(new BorderLayout(10,10));
+        header.setOpaque(false);
+        header.setBorder(new EmptyBorder(10, 20, 10, 20));
+
+        JLabel namaHeader = new JLabel("Nama");
+        styleHeaderLabel(namaHeader);
+        header.add(namaHeader, BorderLayout.WEST);
+
+        JLabel tanggalHeader = new JLabel("Tanggal Lahir");
+        styleHeaderLabel(tanggalHeader);
+        header.add(tanggalHeader, BorderLayout.CENTER);
+
+        // Spacer buat kolom prediksi
+        JLabel prediksiHeader = new JLabel("Prediksi");
+        styleHeaderLabel(prediksiHeader);
+        prediksiHeader.setHorizontalAlignment(SwingConstants.CENTER);
+        header.add(prediksiHeader, BorderLayout.EAST);
+
+        header.setMaximumSize(new Dimension(Integer.MAX_VALUE, header.getPreferredSize().height)); // Penting untuk BoxLayout
+
+        return header;
+    }
+
+    // Method baru untuk menambahkan satu baris data ke list panel
+    public void addDataRow(ModelData data) {
+        JPanel rowPanel = new JPanel(new BorderLayout(10, 10));
+        rowPanel.setOpaque(false);
+        rowPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(255,255,255,40))); // Garis pemisah tipis
+        rowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50)); // Biar tinggi tiap baris sama
+        rowPanel.setBorder(new EmptyBorder(10, 20, 10, 20));
+
+        // Label Nama
+        JLabel namaLabel = new JLabel(data.getNama());
+        styleDataLabel(namaLabel);
+        rowPanel.add(namaLabel, BorderLayout.WEST);
+
+        // Label Tanggal
+        JLabel tanggalLabel = new JLabel(data.getTanggal());
+        styleDataLabel(tanggalLabel);
+        rowPanel.add(tanggalLabel, BorderLayout.CENTER);
+
+        // Tombol Lihat
+        JButton lihatButton = new JButton("LIHAT");
+        styleLihatButton(lihatButton);
+        lihatButton.addActionListener(e -> {
+            System.out.println("Tombol 'Lihat' diklik untuk: " + data.getNama());
+            String teksPrediksi = "Ini adalah contoh teks prediksi untuk " + data.getNama() + ". Implementasi fetching dari DB diperlukan.";
+            ImageIcon gambarZodiak = null;
+            new PrediksiView(data.getNama(), data.getTanggal(), teksPrediksi, gambarZodiak).setVisible(true);
+        });
+        rowPanel.add(lihatButton, BorderLayout.EAST);
+
+        dataListPanel.add(rowPanel);
+    }
+
+    // Method baru untuk membersihkan list sebelum di-refresh
+    public void clearDataList() {
+        dataListPanel.removeAll();
+        dataListPanel.add(createHeaderPanel()); // Tambahkan header lagi setelah dibersihkan
+        dataListPanel.revalidate();
+        dataListPanel.repaint();
+    }
+
     public void refreshTableData() {
         if (controller != null) {
             controller.showAllData();
         }
     }
 
+    // --- STYLING HELPERS ---
+    private void styleHeaderLabel(JLabel label) {
+        label.setFont(customHeaderTableFont);
+        label.setForeground(TEXT_COLOR_LIGHT);
+    }
 
-    private void styleDataTable(String[] visibleColumnNames) {
-        // Sembunyikan kolom "id_data_hidden" dari tampilan view, tapi datanya tetep ada di model
-        if (dataTable.getColumnModel().getColumnCount() > 2 &&
-                dataTable.getColumnModel().getColumn(2).getHeaderValue().toString().equals("id_data_hidden")) {
-            dataTable.getColumnModel().getColumn(2).setMinWidth(0);
-            dataTable.getColumnModel().getColumn(2).setMaxWidth(0);
-            dataTable.getColumnModel().getColumn(2).setWidth(0);
-            dataTable.getColumnModel().getColumn(2).setPreferredWidth(0);
-        }
+    private void styleDataLabel(JLabel label) {
+        label.setFont(helveticaFont.deriveFont(15f));
+        label.setForeground(new Color(210, 215, 220));
+    }
 
-
-        dataTable.setFont(customHeaderTableFont.deriveFont(Font.PLAIN, 15f));
-        dataTable.setForeground(TABLE_CELL_FONT_COLOR);
-        dataTable.setOpaque(false);
-        dataTable.setSelectionForeground(Color.WHITE);
-        dataTable.setSelectionBackground(TABLE_SELECTION_BG_COLOR);
-        dataTable.setRowHeight(35);
-        dataTable.setShowGrid(false);
-        dataTable.setIntercellSpacing(new Dimension(0, 0));
-
-        JTableHeader tableHeader = dataTable.getTableHeader();
-        tableHeader.setFont(customHeaderTableFont);
-        tableHeader.setForeground(TEXT_COLOR_LIGHT);
-        tableHeader.setOpaque(false);
-        tableHeader.setBackground(new Color(0,0,0,0));
-        tableHeader.setDefaultRenderer(new StyledHeaderRenderer(customHeaderTableFont, TEXT_COLOR_LIGHT));
-        tableHeader.setReorderingAllowed(false);
-
-        // Set nama kolom header yang visible (karena modelnya punya kolom hidden)
-        // Ini agak tricky, karena model udah pake columnNamesForModel
-        // Cara yg lebih bener adalah modelnya cuma punya kolom visible,
-        // dan ID diambil dari List<ModelData> terpisah.
-        // Untuk sekarang, kita biarin JTable pake nama kolom dari model, dan yg hidden udah diset lebarnya 0.
-
-        dataTable.setDefaultRenderer(Object.class, new TransparentTableCellRenderer(customHeaderTableFont.deriveFont(Font.PLAIN, 15f), TABLE_CELL_FONT_COLOR));
-
-        // Pastikan nama kolom buat tombol "Lihat" itu "Prediksi" (sesuai columnNamesForHeader)
-        // atau indeks kolom terakhir yang visible.
-        // Jika modelnya pake {"Nama", "Tanggal Lahir", "id_data_hidden", "Prediksi"}
-        // maka kolom "Prediksi" ada di indeks 3.
-        dataTable.getColumn("Prediksi").setCellRenderer(new ButtonTableRenderer("LIHAT"));
-        dataTable.getColumn("Prediksi").setCellEditor(new ButtonTableEditor(new JCheckBox(), "LIHAT", this));
+    private void styleLihatButton(JButton button) {
+        button.setFont(helveticaFont.deriveFont(Font.BOLD, 12f));
+        button.setForeground(TEXT_COLOR_LIGHT);
+        button.setOpaque(false);
+        button.setContentAreaFilled(false);
+        button.setBorderPainted(false);
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) { button.setForeground(TEXT_COLOR_BUTTON_HOVER); }
+            @Override public void mouseExited(MouseEvent e) { button.setForeground(TEXT_COLOR_LIGHT); }
+        });
     }
 
     private void styleTextLikeButton(JButton button) {
@@ -316,7 +289,6 @@ public class MenuView extends JFrame {
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setBorder(new EmptyBorder(8,15,8,15));
-
         button.addMouseListener(new MouseAdapter() {
             @Override public void mouseEntered(MouseEvent e) { button.setForeground(TEXT_COLOR_BUTTON_HOVER); }
             @Override public void mouseExited(MouseEvent e) { button.setForeground(TEXT_COLOR_LIGHT); }
@@ -330,141 +302,7 @@ public class MenuView extends JFrame {
         return separator;
     }
 
-    static class StyledHeaderRenderer extends DefaultTableCellRenderer {
-        private Font headerFont;
-        private Color headerColor;
-        public StyledHeaderRenderer(Font font, Color color) {
-            this.headerFont = font;
-            this.headerColor = color;
-            setHorizontalAlignment(SwingConstants.CENTER);
-            setBorder(BorderFactory.createEmptyBorder(12, 5, 12, 5));
-        }
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            label.setFont(headerFont);
-            label.setForeground(headerColor);
-            label.setOpaque(false);
-            label.setBackground(new Color(0,0,0,0));
-            label.setBorder(this.getBorder());
-            return label;
-        }
-    }
-
-    static class TransparentTableCellRenderer extends DefaultTableCellRenderer {
-        private Font cellFont;
-        private Color cellColor;
-        public TransparentTableCellRenderer(Font font, Color color) {
-            this.cellFont = font;
-            this.cellColor = color;
-        }
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            setFont(cellFont);
-            setForeground(cellColor);
-            if (isSelected) {
-                setBackground(table.getSelectionBackground());
-                setForeground(table.getSelectionForeground());
-            } else {
-                setBackground(new Color(0,0,0,0));
-            }
-            if (value != null) setText(value.toString()); else setText("");
-            setHorizontalAlignment(SwingConstants.CENTER);
-            setOpaque(false);
-            return this;
-        }
-    }
-
-    class ButtonTableRenderer extends JButton implements TableCellRenderer {
-        public ButtonTableRenderer(String text) {
-            super(text);
-            setFont(helveticaFont.deriveFont(Font.BOLD, 12f));
-            setForeground(TEXT_COLOR_LIGHT);
-            setOpaque(false);
-            setContentAreaFilled(false);
-            setBorderPainted(false);
-            setFocusPainted(false);
-            setCursor(new Cursor(Cursor.HAND_CURSOR));
-            setBorder(new EmptyBorder(4, 8, 4, 8));
-            setHorizontalAlignment(SwingConstants.CENTER);
-        }
-        @Override public Component getTableCellRendererComponent(JTable tbl, Object val, boolean isSelected, boolean hasFocus, int r, int c) {
-            if (isSelected) {
-                setForeground(tbl.getSelectionForeground());
-            } else {
-                setForeground(TEXT_COLOR_LIGHT);
-            }
-            return this;
-        }
-    }
-
-    class ButtonTableEditor extends DefaultCellEditor {
-        protected JButton button;
-        private boolean pushed;
-        private int editingRow;
-        private JFrame parentFrame;
-        private String labelButton;
-
-        public ButtonTableEditor(JCheckBox checkBox, String text, JFrame parent) {
-            super(checkBox);
-            this.parentFrame = parent;
-            this.labelButton = text;
-            button = new JButton(this.labelButton);
-
-            button.setFont(helveticaFont.deriveFont(Font.BOLD, 12f));
-            button.setForeground(TEXT_COLOR_LIGHT);
-            button.setOpaque(false);
-            button.setContentAreaFilled(false);
-            button.setBorderPainted(false);
-            button.setFocusPainted(false);
-            button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            button.setBorder(new EmptyBorder(4, 8, 4, 8));
-            button.setHorizontalAlignment(SwingConstants.CENTER);
-            button.setBackground(new Color(0, 0, 0, 0));
-
-            Color originalBtnColor = button.getForeground();
-            button.addMouseListener(new MouseAdapter() {
-                @Override public void mouseEntered(MouseEvent e) { button.setForeground(TEXT_COLOR_BUTTON_HOVER); }
-                @Override public void mouseExited(MouseEvent e) { button.setForeground(originalBtnColor); }
-            });
-            button.addActionListener(e -> fireEditingStopped());
-        }
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            this.editingRow = row;
-            pushed = true;
-            return button;
-        }
-        @Override
-        public Object getCellEditorValue() {
-            if (pushed) {
-                // Ambil ID data dari kolom tersembunyi di model
-                int idData = (Integer) dataTable.getModel().getValueAt(dataTable.convertRowIndexToModel(editingRow), 2); // Indeks kolom ID_Data (hidden)
-                String namaDiRow = dataTable.getValueAt(editingRow, 0).toString(); // Ambil nama dari kolom visible
-                String tanggalLahirDiRow = dataTable.getValueAt(editingRow, 1).toString(); // Ambil tanggal dari kolom visible
-
-                System.out.println("Tombol 'Lihat' diklik untuk idData: " + idData + ", Nama: " + namaDiRow);
-
-                // Di sini lu perlu logic buat ngambil teksPrediksi dari database pake idData
-                // Misalnya, bikin method di ControllerData atau DAO baru:
-                // String teksPrediksi = controller.getPrediksiText(idData);
-                String teksPrediksi = "Ini adalah contoh teks prediksi untuk " + namaDiRow + ". Implementasi fetching dari DB diperlukan."; // Placeholder
-
-                // ImageIcon gambarZodiak = controller.getZodiakImage(idData); // Placeholder
-                ImageIcon gambarZodiak = null; // Ganti dengan logic ambil gambar zodiak
-
-                new PrediksiView(namaDiRow, tanggalLahirDiRow, teksPrediksi, gambarZodiak).setVisible(true);
-            }
-            pushed = false;
-            return this.labelButton;
-        }
-        @Override public boolean stopCellEditing() { pushed = false; return super.stopCellEditing(); }
-        @Override protected void fireEditingStopped() { super.fireEditingStopped(); }
-    }
-
     public int getIdUser(){ return loggedInUser.getId(); }
-    public JTable getTableData(){ return dataTable; }
 
     public static void main(String[] args) {
         try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }

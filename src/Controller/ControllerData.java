@@ -1,9 +1,11 @@
+// irhamanakmamah/projek-akhir-prak.-pbo/Projek-Akhir-Prak.-PBO-master/src/Controller/ControllerData.java
 package Controller;
 
 import Model.Data.DAOData;
 import Model.Data.InterfaceDAOData;
 import Model.Data.ModelData;
-import Model.Data.ModelTable;
+// ModelTable udah gak dipake lagi di sini, jadi bisa diapus import-nya
+// import Model.Data.ModelTable; 
 import View.Menu.AddView;
 import View.Menu.EditView;
 import View.Menu.MenuView;
@@ -31,19 +33,32 @@ public class ControllerData {
         this.daodata = new DAOData();
     }
     public ControllerData(AddView halamanAdd) {
-        this.halamanAdd = ControllerData.this.halamanAdd;
+        // Ini kayaknya ada typo dari kode asli lu, harusnya gini:
+        this.halamanAdd = halamanAdd;
         this.daodata = new DAOData();
     }
     public ControllerData(PrediksiView halamanPrediksi) {
-        this.halamanPrediksi = ControllerData.this.halamanPrediksi;
+        // Sama kayak di atas
+        this.halamanPrediksi = halamanPrediksi;
         this.daodata = new DAOData();
     }
 
+    // --- INI METHOD YANG KITA UBAH TOTAL ---
     public void showAllData() {
+        // 1. Minta view buat ngebersihin list lamanya dulu
+        halamanMenu.clearDataList();
+
+        // 2. Ambil data terbaru dari database
         daftarData = daodata.getAll(halamanMenu.getIdUser());
-        ModelTable table = new ModelTable(daftarData);
-        halamanMenu.getTableData().setModel(table);
+
+        // 3. Looping semua data yang didapet
+        for (ModelData data : daftarData) {
+            // 4. Minta view buat nambahin satu baris baru untuk setiap data
+            halamanMenu.addDataRow(data);
+        }
+
+        // 5. Suruh view buat refresh tampilan, biar data barunya muncul
+        halamanMenu.revalidate();
+        halamanMenu.repaint();
     }
-
-
 }
