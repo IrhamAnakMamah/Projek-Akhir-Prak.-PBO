@@ -1,3 +1,4 @@
+// irhamanakmamah/projek-akhir-prak.-pbo/Projek-Akhir-Prak.-PBO-master/src/Model/Data/DAOData.java
 package Model.Data;
 
 import Database.Connector;
@@ -13,55 +14,53 @@ public class DAOData implements InterfaceDAOData{
     @Override
     public void insert(ModelData data) {
         try {
-            String query = "INSERT data (id_user, nama, tanggal_lahir, prediksi) VALUES (?,?,?,?);";
+            // --- PERUBAHAN: Query disesuaikan dengan skema DB (tanpa 'prediksi') ---
+            String query = "INSERT INTO data (id_user, nama, tanggal_lahir) VALUES (?,?,?);";
 
             PreparedStatement statement;
             statement = Connector.Connect().prepareStatement(query);
-            statement.setInt(4, data.getId_user());
-            statement.setString(1, data.getNama());
-            statement.setString(2, data.getTanggal());
-            statement.setString(3, data.getPrediksi());
+            // --- PERUBAHAN: Urutan parameter disesuaikan ---
+            statement.setInt(1, data.getId_user());
+            statement.setString(2, data.getNama());
+            statement.setString(3, data.getTanggal());
 
             statement.executeUpdate();
-
             statement.close();
         } catch (SQLException e) {
-            System.out.println("update Failed! (" + e.getMessage() + ")");
+            System.out.println("Insert Failed! (" + e.getMessage() + ")");
         }
     }
 
     @Override
     public void update(ModelData data) {
         try {
-            String query = "UPDATE data SET nama=?, tanggal_lahir=?, prediksi=? WHERE id=?;";
+            // --- PERUBAHAN: Query disesuaikan (tanpa 'prediksi', WHERE ke id_data) ---
+            String query = "UPDATE data SET nama=?, tanggal_lahir=? WHERE id_data=?;";
 
             PreparedStatement statement;
             statement = Connector.Connect().prepareStatement(query);
             statement.setString(1, data.getNama());
             statement.setString(2, data.getTanggal());
-            statement.setString(3, data.getPrediksi());
-            statement.setInt(4, data.getId_data());
+            statement.setInt(3, data.getId_data());
 
-            // Menjalankan query untuk menghapus data mahasiswa yang dipilih
             statement.executeUpdate();
-
             statement.close();
         } catch (SQLException e) {
-            System.out.println("update Failed! (" + e.getMessage() + ")");
+            System.out.println("Update Failed! (" + e.getMessage() + ")");
         }
     }
 
     @Override
     public void delete(int id) {
         try {
-            String query = "DELETE FROM data WHERE id=?;";
+            // --- PERUBAHAN: WHERE ke id_data ---
+            String query = "DELETE FROM data WHERE id_data=?;";
 
             PreparedStatement statement;
             statement = Connector.Connect().prepareStatement(query);
             statement.setInt(1, id);
 
             statement.executeUpdate();
-
             statement.close();
         } catch (SQLException e) {
             System.out.println("Delete Failed: " + e.getLocalizedMessage());
@@ -70,12 +69,11 @@ public class DAOData implements InterfaceDAOData{
 
     @Override
     public List<ModelData> getAll(int user_id) {
-        List<ModelData> Data = null;
-
+        List<ModelData> listData = null;
         try{
-            Data = new ArrayList<>();
-            System.out.println("TESS");
-            String query = "SELECT nama,tanggal_lahir FROM data where id_user=?;";
+            listData = new ArrayList<>();
+            // --- PERUBAHAN: Ambil id_data juga, ini PENTING! ---
+            String query = "SELECT id_data, nama, tanggal_lahir FROM data where id_user=?;";
 
             PreparedStatement statement;
             statement = Connector.Connect().prepareStatement(query);
@@ -85,17 +83,18 @@ public class DAOData implements InterfaceDAOData{
 
             while(resultSet.next()){
                 ModelData dt = new ModelData();
+                // --- PERUBAHAN: Set id_data dari hasil query ---
+                dt.setId_data(resultSet.getInt("id_data"));
                 dt.setNama(resultSet.getString("nama"));
                 dt.setTanggal(resultSet.getString("tanggal_lahir"));
-                dt.setPrediksi("Lihat");
+                // dt.setPrediksi("Lihat"); // Ini gak perlu lagi, kita handle di view
 
-                Data.add(dt);
+                listData.add(dt);
             }
             statement.close();
         }catch(Exception e){
-            System.out.println("Error: " + e.getLocalizedMessage());
+            System.out.println("Error get all data: " + e.getLocalizedMessage());
         }
-
-        return Data;
+        return listData;
     }
 }

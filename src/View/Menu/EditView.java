@@ -1,8 +1,6 @@
-package View.Menu; // Sesuaikan package
+package View.Menu;
 
-import Controller.ControllerData; // Asumsi controller
 import Model.Data.ModelData;
-import Model.User.ModelUser;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -29,7 +27,7 @@ public class EditView extends JFrame {
     private final Color TEXT_FIELD_CARET_COLOR = TEXT_COLOR_LIGHT;
 
     private int idDataToEdit;
-    private MenuView parentMenuView; // Referensi ke MenuView buat refresh
+    private MenuView parentMenuView;
 
     public EditView(ModelData dataToEdit, MenuView parent) {
         this.idDataToEdit = dataToEdit.getId_data();
@@ -98,7 +96,7 @@ public class EditView extends JFrame {
         gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 0.8; gbc.fill = GridBagConstraints.HORIZONTAL;
         namaField = new JTextField();
         styleFormField(namaField);
-        namaField.setText(dataToEdit.getNama()); // Isi data awal
+        namaField.setText(dataToEdit.getNama());
         formPanel.add(namaField, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.2; gbc.fill = GridBagConstraints.NONE;
@@ -110,11 +108,11 @@ public class EditView extends JFrame {
         tanggalField = new JTextField();
         styleFormField(tanggalField);
         tanggalField.setToolTipText("Format: YYYY-MM-DD");
-        tanggalField.setText(dataToEdit.getTanggal()); // Isi data awal
+        tanggalField.setText(dataToEdit.getTanggal());
         formPanel.add(tanggalField, gbc);
 
         gbc.gridy = 2; gbc.weighty = 1.0;
-        formPanel.add(new JLabel(), gbc); // Spacer
+        formPanel.add(new JLabel(), gbc);
 
         mainPanel.add(formPanel, BorderLayout.CENTER);
 
@@ -128,6 +126,7 @@ public class EditView extends JFrame {
 
         saveButton = new JButton("SAVE");
         styleTextLikeButton(saveButton);
+
         saveButton.addActionListener(e -> {
             String nama = namaField.getText().trim();
             String tanggal = tanggalField.getText().trim();
@@ -136,29 +135,19 @@ public class EditView extends JFrame {
                 JOptionPane.showMessageDialog(this, "Nama dan Tanggal Lahir tidak boleh kosong!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            // Validasi format tanggal bisa ditambah
+            if (!tanggal.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                JOptionPane.showMessageDialog(this, "Format tanggal salah! Gunakan YYYY-MM-DD.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
             ModelData updatedData = new ModelData();
             updatedData.setId_data(idDataToEdit);
-            updatedData.setId_user(parentMenuView.getIdUser()); // Ambil id_user dari parent (logged in user)
             updatedData.setNama(nama);
             updatedData.setTanggal(tanggal);
-            // updatedData.setPrediksi(...); // Jika masih ada field prediksi di ModelData
 
-            // Panggil ControllerData buat update
-            // boolean success = parentMenuView.controller.updateData(updatedData);
-
-            // SIMULASI UPDATE (GANTI DENGAN LOGIC CONTROLLER ASLI)
-            System.out.println("Simulating UPDATE data: ID Data=" + idDataToEdit + ", Nama=" + nama + ", Tanggal=" + tanggal);
-            boolean success = true; // Anggap sukses
-
-            if (success) {
-                JOptionPane.showMessageDialog(this, "Data Persona berhasil diupdate!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
-                parentMenuView.refreshTableData(); // Refresh tabel di MenuView
-                dispose();
-            } else {
-                JOptionPane.showMessageDialog(this, "Gagal mengupdate data!", "Error", JOptionPane.ERROR_MESSAGE);
-            }
+            parentMenuView.getController().updateData(updatedData);
+            parentMenuView.refreshTableData();
+            dispose();
         });
 
         bottomPanel.add(cancelButton);
@@ -168,11 +157,11 @@ public class EditView extends JFrame {
         setVisible(true);
     }
 
-    private void styleFormLabel(JLabel label) { /* ... sama kayak di AddView ... */
+    private void styleFormLabel(JLabel label) {
         label.setFont(labelFont);
         label.setForeground(TEXT_COLOR_LIGHT);
     }
-    private void styleFormField(JTextField field) { /* ... sama kayak di AddView ... */
+    private void styleFormField(JTextField field) {
         field.setOpaque(false);
         field.setBackground(new Color(0,0,0,0));
         field.setForeground(TEXT_FIELD_TEXT_COLOR);
@@ -182,7 +171,7 @@ public class EditView extends JFrame {
         Border padding = BorderFactory.createEmptyBorder(5, 8, 5, 8);
         field.setBorder(BorderFactory.createCompoundBorder(underline, padding));
     }
-    private void styleTextLikeButton(JButton button) { /* ... sama kayak di AddView ... */
+    private void styleTextLikeButton(JButton button) {
         button.setFont(helveticaFont.deriveFont(Font.BOLD, 15F));
         button.setForeground(TEXT_COLOR_LIGHT);
         button.setOpaque(false);
@@ -195,17 +184,5 @@ public class EditView extends JFrame {
             @Override public void mouseEntered(MouseEvent e) { button.setForeground(TEXT_COLOR_BUTTON_HOVER); }
             @Override public void mouseExited(MouseEvent e) { button.setForeground(TEXT_COLOR_LIGHT); }
         });
-    }
-
-    public static void main(String[] args) {
-        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }
-        catch (Exception e) { e.printStackTrace(); }
-
-        ModelData dummyData = new ModelData();
-        dummyData.setId_data(101); dummyData.setNama("Budi Edit"); dummyData.setTanggal("2000-01-15");
-        ModelUser dummyUser = new ModelUser(); dummyUser.setId(1); dummyUser.setNama("TEST USER");
-        MenuView dummyMenuView = new MenuView(dummyUser); // Buat referensi parent
-
-        SwingUtilities.invokeLater(() -> new EditView(dummyData, dummyMenuView).setVisible(true));
     }
 }

@@ -1,8 +1,6 @@
-package View.Menu; // Sesuaikan package
+package View.Menu;
 
-import Controller.ControllerData; // Asumsi controller ada di sini
 import Model.Data.ModelData;
-import Model.User.ModelUser;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -10,7 +8,6 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-// import com.toedter.calendar.JDateChooser; // Kalo mau pake
 
 public class AddView extends JFrame {
 
@@ -29,8 +26,8 @@ public class AddView extends JFrame {
     private final Color TEXT_FIELD_TEXT_COLOR = new Color(230, 235, 240);
     private final Color TEXT_FIELD_CARET_COLOR = TEXT_COLOR_LIGHT;
 
-    private int idCurrentUser; // ID user yang lagi login
-    private MenuView parentMenuView; // Referensi ke MenuView buat refresh tabel
+    private int idCurrentUser;
+    private MenuView parentMenuView;
 
     public AddView(int idUser, MenuView parent) {
         this.idCurrentUser = idUser;
@@ -40,7 +37,7 @@ public class AddView extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(550, 450);
         setMinimumSize(new Dimension(450, 350));
-        setLocationRelativeTo(parent); // Muncul relatif ke MenuView
+        setLocationRelativeTo(parent);
         setResizable(false);
 
         try {
@@ -113,7 +110,7 @@ public class AddView extends JFrame {
         formPanel.add(tanggalField, gbc);
 
         gbc.gridy = 2; gbc.weighty = 1.0;
-        formPanel.add(new JLabel(), gbc); // Spacer
+        formPanel.add(new JLabel(), gbc);
 
         mainPanel.add(formPanel, BorderLayout.CENTER);
 
@@ -127,6 +124,7 @@ public class AddView extends JFrame {
 
         addButton = new JButton("ADD");
         styleTextLikeButton(addButton);
+
         addButton.addActionListener(e -> {
             String nama = namaField.getText().trim();
             String tanggal = tanggalField.getText().trim();
@@ -135,35 +133,19 @@ public class AddView extends JFrame {
                 JOptionPane.showMessageDialog(this, "Nama dan Tanggal Lahir tidak boleh kosong!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            // Validasi format tanggal (YYYY-MM-DD) bisa ditambah di sini
-            // if (!tanggal.matches("\\d{4}-\\d{2}-\\d{2}")) {
-            //    JOptionPane.showMessageDialog(this, "Format tanggal salah! Gunakan YYYY-MM-DD.", "Error", JOptionPane.ERROR_MESSAGE);
-            //    return;
-            // }
+            if (!tanggal.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                JOptionPane.showMessageDialog(this, "Format tanggal salah! Gunakan YYYY-MM-DD.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
             ModelData newData = new ModelData();
             newData.setId_user(idCurrentUser);
             newData.setNama(nama);
             newData.setTanggal(tanggal);
-            // Kolom prediksi di tabel data SQL versi lama lu ada, tapi di versi baru gak ada
-            // Jika Prediksi (persona_text) digenerate otomatis atau di-link nanti, biarin kosong
-            // newData.setPrediksi("Belum ada prediksi"); // Sesuai ModelData jika masih ada field prediksi
 
-            // Panggil ControllerData buat insert
-            // Asumsi ControllerData punya method insertData(ModelData data)
-            // boolean success = parentMenuView.controller.insertData(newData); // Panggil controller dari parent
-
-            // SIMULASI INSERT (GANTI DENGAN LOGIC CONTROLLER ASLI)
-            System.out.println("Simulating ADD data: ID User=" + idCurrentUser + ", Nama=" + nama + ", Tanggal=" + tanggal);
-            boolean success = true; // Anggap sukses buat demo
-
-            if (success) {
-                JOptionPane.showMessageDialog(this, "Data Persona berhasil ditambahkan!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
-                parentMenuView.refreshTableData(); // Refresh tabel di MenuView
-                dispose(); // Tutup AddView
-            } else {
-                JOptionPane.showMessageDialog(this, "Gagal menambahkan data!", "Error", JOptionPane.ERROR_MESSAGE);
-            }
+            parentMenuView.getController().insertData(newData);
+            parentMenuView.refreshTableData();
+            dispose();
         });
 
         bottomPanel.add(cancelButton);
@@ -173,11 +155,12 @@ public class AddView extends JFrame {
         setVisible(true);
     }
 
-    private void styleFormLabel(JLabel label) { /* ... sama kayak di EditView ... */
+    private void styleFormLabel(JLabel label) {
         label.setFont(labelFont);
         label.setForeground(TEXT_COLOR_LIGHT);
     }
-    private void styleFormField(JTextField field) { /* ... sama kayak di EditView ... */
+
+    private void styleFormField(JTextField field) {
         field.setOpaque(false);
         field.setBackground(new Color(0,0,0,0));
         field.setForeground(TEXT_FIELD_TEXT_COLOR);
@@ -187,7 +170,8 @@ public class AddView extends JFrame {
         Border padding = BorderFactory.createEmptyBorder(5, 8, 5, 8);
         field.setBorder(BorderFactory.createCompoundBorder(underline, padding));
     }
-    private void styleTextLikeButton(JButton button) { /* ... sama kayak di EditView ... */
+
+    private void styleTextLikeButton(JButton button) {
         button.setFont(helveticaFont.deriveFont(Font.BOLD, 15F));
         button.setForeground(TEXT_COLOR_LIGHT);
         button.setOpaque(false);
@@ -200,16 +184,5 @@ public class AddView extends JFrame {
             @Override public void mouseEntered(MouseEvent e) { button.setForeground(TEXT_COLOR_BUTTON_HOVER); }
             @Override public void mouseExited(MouseEvent e) { button.setForeground(TEXT_COLOR_LIGHT); }
         });
-    }
-
-    public static void main(String[] args) {
-        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }
-        catch (Exception e) { e.printStackTrace(); }
-        // Buat testing, kita butuh frame parent dummy buat MenuView
-        JFrame dummyParentFrame = new JFrame();
-        ModelUser dummyUser = new ModelUser(); dummyUser.setId(1); dummyUser.setNama("TEST USER");
-        MenuView dummyMenuView = new MenuView(dummyUser); // Ini cuma buat dapet referensi parent
-
-        SwingUtilities.invokeLater(() -> new AddView(1, dummyMenuView).setVisible(true));
     }
 }

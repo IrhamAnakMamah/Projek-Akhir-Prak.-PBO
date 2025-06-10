@@ -1,4 +1,3 @@
-// irhamanakmamah/projek-akhir-prak.-pbo/Projek-Akhir-Prak.-PBO-master/src/View/Menu/MenuView.java
 package View.Menu;
 
 import Controller.ControllerData;
@@ -16,22 +15,17 @@ public class MenuView extends JFrame {
 
     ControllerData controller;
     private ModelUser loggedInUser;
-
-    // Komponen UI yang berubah
-    private JPanel dataListPanel; // Panel utama untuk menampung baris-baris data
-    private JScrollPane scrollPane; // Scroll pane untuk dataListPanel
-
+    private JPanel dataListPanel;
+    private JScrollPane scrollPane;
     private JLabel logoLabel;
     private JLabel welcomeLabel;
-    private JButton addButton, editButton, deleteButton, logoutButton;
+    private JButton addButton, logoutButton;
 
     private Font helveticaFont;
     private Font customHeaderTableFont;
-
     private ImageIcon backgroundImage;
     private ImageIcon personaPredictionLogo;
 
-    // Konstanta warna dan style tetap sama
     private final Color DATA_AREA_BORDER_COLOR = new Color(200, 160, 80, 230);
     private final int DATA_AREA_CORNER_RADIUS = 35;
     private final Color TEXT_COLOR_LIGHT = new Color(225, 230, 235);
@@ -39,6 +33,7 @@ public class MenuView extends JFrame {
 
     public MenuView(ModelUser user) {
         this.loggedInUser = user;
+        controller = new ControllerData(this);
 
         setTitle("PersonaPrediction - Menu Utama");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -77,7 +72,6 @@ public class MenuView extends JFrame {
         mainPanel.setBorder(new EmptyBorder(25, 40, 25, 40));
         getContentPane().add(mainPanel);
 
-        // === TOP BAR (Tidak berubah) ===
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
         if (personaPredictionLogo != null) logoLabel = new JLabel(personaPredictionLogo);
@@ -88,19 +82,17 @@ public class MenuView extends JFrame {
         }
         topPanel.add(logoLabel, BorderLayout.WEST);
 
-        String userName = (this.loggedInUser != null && this.loggedInUser.getNama() != null && !this.loggedInUser.getNama().isEmpty()) ? this.loggedInUser.getNama().toUpperCase() : "GUEST";
-        welcomeLabel = new JLabel("WELCOME, " + userName);
+        String userName = (this.loggedInUser != null && this.loggedInUser.getNama() != null && !this.loggedInUser.getNama().isEmpty()) ? this.loggedInUser.getNama() : "GUEST";
+        welcomeLabel = new JLabel("Welcome, " + userName);
         welcomeLabel.setFont(helveticaFont.deriveFont(Font.BOLD, 16f));
         welcomeLabel.setForeground(TEXT_COLOR_LIGHT);
         topPanel.add(welcomeLabel, BorderLayout.EAST);
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
-        // === CENTER AREA: DATA DISPLAY (INI YANG DIUBAH TOTAL) ===
         JPanel centerContentPanel = new JPanel(new BorderLayout(0, 0));
         centerContentPanel.setOpaque(false);
-        centerContentPanel.setBorder(new EmptyBorder(15, 5, 0, 5)); // Kurangin padding atas
+        centerContentPanel.setBorder(new EmptyBorder(15, 5, 0, 5));
 
-        // Panel luar yang punya border rounded
         JPanel dataAreaWithRoundedBorder = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -118,60 +110,39 @@ public class MenuView extends JFrame {
         dataAreaWithRoundedBorder.setOpaque(false);
         dataAreaWithRoundedBorder.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        // Panel untuk menampung list data, dengan layout vertikal
         dataListPanel = new JPanel();
         dataListPanel.setLayout(new BoxLayout(dataListPanel, BoxLayout.Y_AXIS));
         dataListPanel.setOpaque(false);
 
-        // Header "manual" di atas list
         JPanel headerPanel = createHeaderPanel();
         dataListPanel.add(headerPanel);
 
-        // Bungkus list panel dengan JScrollPane
         scrollPane = new JScrollPane(dataListPanel);
         scrollPane.setOpaque(false);
         scrollPane.getViewport().setOpaque(false);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16); // Biar scroll lebih smooth
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
         dataAreaWithRoundedBorder.add(scrollPane, BorderLayout.CENTER);
         centerContentPanel.add(dataAreaWithRoundedBorder, BorderLayout.CENTER);
         mainPanel.add(centerContentPanel, BorderLayout.CENTER);
 
-        // === BOTTOM BUTTONS (Tidak berubah) ===
         JPanel bottomButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 5));
         bottomButtonPanel.setOpaque(false);
         bottomButtonPanel.setBorder(new EmptyBorder(25,0,10,0));
 
         addButton = new JButton("ADD DATA");
-        editButton = new JButton("EDIT DATA");
-        deleteButton = new JButton("DELETE DATA");
         logoutButton = new JButton("LOGOUT");
 
         styleTextLikeButton(addButton);
-        styleTextLikeButton(editButton);
-        styleTextLikeButton(deleteButton);
         styleTextLikeButton(logoutButton);
 
         bottomButtonPanel.add(addButton);
         bottomButtonPanel.add(createSeparatorLabel());
-        bottomButtonPanel.add(editButton);
-        bottomButtonPanel.add(createSeparatorLabel());
-        bottomButtonPanel.add(deleteButton);
-        bottomButtonPanel.add(createSeparatorLabel());
         bottomButtonPanel.add(logoutButton);
         mainPanel.add(bottomButtonPanel, BorderLayout.SOUTH);
 
-        // Controller akan mengisi dataListPanel
-        controller = new ControllerData(this);
-        controller.showAllData();
-
-        // Action listener button bawah masih sama, TAPI perlu penyesuaian untuk edit/delete
-        // karena kita tidak bisa "getSelectedRow" lagi. Ini contoh, bisa dikembangkan.
         addButton.addActionListener(e -> new AddView(loggedInUser.getId(), this).setVisible(true));
-
-        editButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Fitur Edit perlu cara baru untuk memilih data.", "Info", JOptionPane.INFORMATION_MESSAGE));
-        deleteButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Fitur Delete perlu cara baru untuk memilih data.", "Info", JOptionPane.INFORMATION_MESSAGE));
 
         logoutButton.addActionListener(e -> {
             int response = JOptionPane.showConfirmDialog(this, "Yakin mau logout, bro?", "Logout Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
@@ -181,70 +152,94 @@ public class MenuView extends JFrame {
             }
         });
 
+        controller.showAllData();
         setVisible(true);
     }
 
-    // Method untuk membuat header palsu
     private JPanel createHeaderPanel() {
-        JPanel header = new JPanel(new BorderLayout(10,10));
+        JPanel header = new JPanel(new GridBagLayout());
         header.setOpaque(false);
         header.setBorder(new EmptyBorder(10, 20, 10, 20));
+        GridBagConstraints gbc = new GridBagConstraints();
 
+        gbc.weightx = 0.4; gbc.anchor = GridBagConstraints.WEST; gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0;
         JLabel namaHeader = new JLabel("Nama");
         styleHeaderLabel(namaHeader);
-        header.add(namaHeader, BorderLayout.WEST);
+        header.add(namaHeader, gbc);
 
+        gbc.weightx = 0.4;
+        gbc.gridx = 1;
         JLabel tanggalHeader = new JLabel("Tanggal Lahir");
         styleHeaderLabel(tanggalHeader);
-        header.add(tanggalHeader, BorderLayout.CENTER);
+        header.add(tanggalHeader, gbc);
 
-        // Spacer buat kolom prediksi
-        JLabel prediksiHeader = new JLabel("Prediksi");
-        styleHeaderLabel(prediksiHeader);
-        prediksiHeader.setHorizontalAlignment(SwingConstants.CENTER);
-        header.add(prediksiHeader, BorderLayout.EAST);
+        gbc.weightx = 0.2; gbc.anchor = GridBagConstraints.CENTER;
+        gbc.gridx = 2;
+        JLabel actionsHeader = new JLabel("Actions");
+        styleHeaderLabel(actionsHeader);
+        header.add(actionsHeader, gbc);
 
-        header.setMaximumSize(new Dimension(Integer.MAX_VALUE, header.getPreferredSize().height)); // Penting untuk BoxLayout
-
+        header.setMaximumSize(new Dimension(Integer.MAX_VALUE, header.getPreferredSize().height));
         return header;
     }
 
-    // Method baru untuk menambahkan satu baris data ke list panel
     public void addDataRow(ModelData data) {
-        JPanel rowPanel = new JPanel(new BorderLayout(10, 10));
+        JPanel rowPanel = new JPanel(new GridBagLayout());
         rowPanel.setOpaque(false);
-        rowPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(255,255,255,40))); // Garis pemisah tipis
-        rowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50)); // Biar tinggi tiap baris sama
-        rowPanel.setBorder(new EmptyBorder(10, 20, 10, 20));
+        rowPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(255,255,255,40)));
+        rowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
+        rowPanel.setBorder(new EmptyBorder(5, 20, 5, 20));
+        GridBagConstraints gbc = new GridBagConstraints();
 
-        // Label Nama
+        gbc.weightx = 0.4; gbc.anchor = GridBagConstraints.WEST; gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0;
         JLabel namaLabel = new JLabel(data.getNama());
         styleDataLabel(namaLabel);
-        rowPanel.add(namaLabel, BorderLayout.WEST);
+        rowPanel.add(namaLabel, gbc);
 
-        // Label Tanggal
+        gbc.weightx = 0.4;
+        gbc.gridx = 1;
         JLabel tanggalLabel = new JLabel(data.getTanggal());
         styleDataLabel(tanggalLabel);
-        rowPanel.add(tanggalLabel, BorderLayout.CENTER);
+        rowPanel.add(tanggalLabel, gbc);
 
-        // Tombol Lihat
-        JButton lihatButton = new JButton("LIHAT");
-        styleLihatButton(lihatButton);
+        gbc.weightx = 0.2; gbc.anchor = GridBagConstraints.CENTER;
+        gbc.gridx = 2;
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+        actionPanel.setOpaque(false);
+
+        JButton lihatButton = new JButton("Lihat");
+        styleActionButton(lihatButton);
         lihatButton.addActionListener(e -> {
-            System.out.println("Tombol 'Lihat' diklik untuk: " + data.getNama());
-            String teksPrediksi = "Ini adalah contoh teks prediksi untuk " + data.getNama() + ". Implementasi fetching dari DB diperlukan.";
-            ImageIcon gambarZodiak = null;
-            new PrediksiView(data.getNama(), data.getTanggal(), teksPrediksi, gambarZodiak).setVisible(true);
+            new PrediksiView(data.getNama(), data.getTanggal(), "Teks prediksi dari DB nanti di sini...", null).setVisible(true);
         });
-        rowPanel.add(lihatButton, BorderLayout.EAST);
+
+        JButton editButton = new JButton("Edit");
+        styleActionButton(editButton);
+        editButton.addActionListener(e -> new EditView(data, this));
+
+        JButton deleteButton = new JButton("Delete");
+        styleActionButton(deleteButton);
+        deleteButton.addActionListener(e -> {
+            int response = JOptionPane.showConfirmDialog(this, "Yakin mau jokul data \"" + data.getNama() + "\"?", "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (response == JOptionPane.YES_OPTION) {
+                controller.deleteData(data.getId_data());
+                refreshTableData();
+            }
+        });
+
+        actionPanel.add(lihatButton);
+        actionPanel.add(editButton);
+        actionPanel.add(deleteButton);
+        rowPanel.add(actionPanel, gbc);
 
         dataListPanel.add(rowPanel);
     }
 
-    // Method baru untuk membersihkan list sebelum di-refresh
     public void clearDataList() {
         dataListPanel.removeAll();
-        dataListPanel.add(createHeaderPanel()); // Tambahkan header lagi setelah dibersihkan
+        dataListPanel.add(createHeaderPanel());
         dataListPanel.revalidate();
         dataListPanel.repaint();
     }
@@ -255,7 +250,6 @@ public class MenuView extends JFrame {
         }
     }
 
-    // --- STYLING HELPERS ---
     private void styleHeaderLabel(JLabel label) {
         label.setFont(customHeaderTableFont);
         label.setForeground(TEXT_COLOR_LIGHT);
@@ -266,7 +260,7 @@ public class MenuView extends JFrame {
         label.setForeground(new Color(210, 215, 220));
     }
 
-    private void styleLihatButton(JButton button) {
+    private void styleActionButton(JButton button) {
         button.setFont(helveticaFont.deriveFont(Font.BOLD, 12f));
         button.setForeground(TEXT_COLOR_LIGHT);
         button.setOpaque(false);
@@ -304,12 +298,8 @@ public class MenuView extends JFrame {
 
     public int getIdUser(){ return loggedInUser.getId(); }
 
-    public static void main(String[] args) {
-        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }
-        catch (Exception e) { e.printStackTrace(); }
-        ModelUser dummyUser = new ModelUser();
-        dummyUser.setId(1);
-        dummyUser.setNama("IRHAM UHUY");
-        SwingUtilities.invokeLater(() -> new MenuView(dummyUser).setVisible(true));
+    // --- INI DIA "KUNCI" YANG DITAMBAHKAN ---
+    public ControllerData getController() {
+        return this.controller;
     }
 }

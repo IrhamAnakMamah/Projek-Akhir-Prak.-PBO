@@ -1,22 +1,21 @@
-// irhamanakmamah/projek-akhir-prak.-pbo/Projek-Akhir-Prak.-PBO-master/src/Controller/ControllerData.java
 package Controller;
 
 import Model.Data.DAOData;
 import Model.Data.InterfaceDAOData;
 import Model.Data.ModelData;
-// ModelTable udah gak dipake lagi di sini, jadi bisa diapus import-nya
-// import Model.Data.ModelTable; 
 import View.Menu.AddView;
 import View.Menu.EditView;
 import View.Menu.MenuView;
 import View.Menu.PrediksiView;
 
 import java.util.List;
+import javax.swing.JOptionPane;
 
 public class ControllerData {
-    // mengontrol flow dari tabel data (tabel data digunakan ketika sudah berhasil login)
 
     MenuView halamanMenu;
+    // Constructor lain ini sebenarnya tidak perlu jika controller hanya dibuat di MenuView
+    // Tapi kita biarkan saja sesuai struktur awal lu
     EditView halamanEdit;
     AddView halamanAdd;
     PrediksiView halamanPrediksi;
@@ -33,32 +32,44 @@ public class ControllerData {
         this.daodata = new DAOData();
     }
     public ControllerData(AddView halamanAdd) {
-        // Ini kayaknya ada typo dari kode asli lu, harusnya gini:
         this.halamanAdd = halamanAdd;
         this.daodata = new DAOData();
     }
     public ControllerData(PrediksiView halamanPrediksi) {
-        // Sama kayak di atas
         this.halamanPrediksi = halamanPrediksi;
         this.daodata = new DAOData();
     }
 
-    // --- INI METHOD YANG KITA UBAH TOTAL ---
     public void showAllData() {
-        // 1. Minta view buat ngebersihin list lamanya dulu
         halamanMenu.clearDataList();
-
-        // 2. Ambil data terbaru dari database
         daftarData = daodata.getAll(halamanMenu.getIdUser());
 
-        // 3. Looping semua data yang didapet
-        for (ModelData data : daftarData) {
-            // 4. Minta view buat nambahin satu baris baru untuk setiap data
-            halamanMenu.addDataRow(data);
+        if (daftarData != null && !daftarData.isEmpty()) {
+            for (ModelData data : daftarData) {
+                halamanMenu.addDataRow(data);
+            }
         }
 
-        // 5. Suruh view buat refresh tampilan, biar data barunya muncul
         halamanMenu.revalidate();
         halamanMenu.repaint();
+    }
+
+    // --- METHOD BARU YANG BIKIN TOMBOLNYA JALAN ---
+    public void insertData(ModelData data) {
+        // Validasi sudah ada di AddView, jadi di sini kita langsung eksekusi
+        daodata.insert(data);
+        JOptionPane.showMessageDialog(halamanAdd, "Data baru berhasil dijokul!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void updateData(ModelData data) {
+        // Validasi sudah ada di EditView, jadi di sini kita langsung eksekusi
+        daodata.update(data);
+        JOptionPane.showMessageDialog(halamanEdit, "Data berhasil di-update!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void deleteData(int id) {
+        daodata.delete(id);
+        // Bisa tambahin notif sukses juga kalo mau
+        // JOptionPane.showMessageDialog(halamanMenu, "Data berhasil dihapus!");
     }
 }
