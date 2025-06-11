@@ -1,3 +1,5 @@
+// irhamanakmamah/projek-akhir-prak.-pbo/Projek-Akhir-Prak.-PBO-master/src/View/Menu/MenuView.java
+
 package View.Menu;
 
 import Controller.ControllerData;
@@ -10,6 +12,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
 
 public class MenuView extends JFrame {
 
@@ -31,6 +34,8 @@ public class MenuView extends JFrame {
     private final Color TEXT_COLOR_LIGHT = new Color(225, 230, 235);
     private final Color TEXT_COLOR_BUTTON_HOVER = new Color(170, 200, 255);
 
+    private GridBagConstraints gbcData;
+
     public MenuView(ModelUser user) {
         this.loggedInUser = user;
         controller = new ControllerData(this);
@@ -42,6 +47,7 @@ public class MenuView extends JFrame {
         setLocationRelativeTo(null);
         setResizable(true);
 
+        // Load resources
         try {
             java.net.URL bgUrl = getClass().getResource("/resources/BackgroundMainView.png");
             if (bgUrl != null) backgroundImage = new ImageIcon(bgUrl);
@@ -54,9 +60,11 @@ public class MenuView extends JFrame {
             e.printStackTrace();
         }
 
+        // Fonts
         helveticaFont = new Font("Helvetica", Font.PLAIN, 14);
         customHeaderTableFont = helveticaFont.deriveFont(Font.BOLD, 16f);
 
+        // Panel utama dengan background
         JPanel mainPanel = new JPanel(new BorderLayout(0, 15)) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -89,10 +97,12 @@ public class MenuView extends JFrame {
         topPanel.add(welcomeLabel, BorderLayout.EAST);
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
+        // Panel tengah (area data)
         JPanel centerContentPanel = new JPanel(new BorderLayout(0, 0));
         centerContentPanel.setOpaque(false);
         centerContentPanel.setBorder(new EmptyBorder(15, 5, 0, 5));
 
+        // Panel dengan border rounded
         JPanel dataAreaWithRoundedBorder = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -108,16 +118,21 @@ public class MenuView extends JFrame {
             }
         };
         dataAreaWithRoundedBorder.setOpaque(false);
-        dataAreaWithRoundedBorder.setBorder(new EmptyBorder(5, 5, 5, 5));
+        dataAreaWithRoundedBorder.setBorder(new EmptyBorder(15, 15, 15, 15)); // Padding dalem border
 
-        dataListPanel = new JPanel();
-        dataListPanel.setLayout(new BoxLayout(dataListPanel, BoxLayout.Y_AXIS));
+        dataListPanel = new JPanel(new GridBagLayout());
         dataListPanel.setOpaque(false);
 
-        JPanel headerPanel = createHeaderPanel();
-        dataListPanel.add(headerPanel);
+        gbcData = new GridBagConstraints();
+        gbcData.fill = GridBagConstraints.HORIZONTAL;
+        gbcData.insets = new Insets(8, 10, 8, 10); // Jarak antar sel
 
-        scrollPane = new JScrollPane(dataListPanel);
+
+        JPanel wrapperForScrollPane = new JPanel(new BorderLayout());
+        wrapperForScrollPane.setOpaque(false);
+        wrapperForScrollPane.add(dataListPanel, BorderLayout.NORTH);
+
+        scrollPane = new JScrollPane(wrapperForScrollPane);
         scrollPane.setOpaque(false);
         scrollPane.getViewport().setOpaque(false);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -142,8 +157,8 @@ public class MenuView extends JFrame {
         bottomButtonPanel.add(logoutButton);
         mainPanel.add(bottomButtonPanel, BorderLayout.SOUTH);
 
+        // Action Listeners
         addButton.addActionListener(e -> new AddView(loggedInUser.getId(), this).setVisible(true));
-
         logoutButton.addActionListener(e -> {
             int response = JOptionPane.showConfirmDialog(this, "Yakin mau logout, bro?", "Logout Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
             if (response == JOptionPane.YES_OPTION) {
@@ -152,67 +167,84 @@ public class MenuView extends JFrame {
             }
         });
 
-        controller.showAllData();
+        // Tampilkan semua data saat pertama kali buka
+        refreshTableData();
         setVisible(true);
     }
 
-    private JPanel createHeaderPanel() {
-        JPanel header = new JPanel(new GridBagLayout());
-        header.setOpaque(false);
-        header.setBorder(new EmptyBorder(10, 20, 10, 20));
-        GridBagConstraints gbc = new GridBagConstraints();
+    private void createHeaderPanel() {
+        gbcData.gridy = 0; // Header selalu di baris (y) ke-0
+        gbcData.weighty = 0; // Header tidak perlu stretch vertikal
+        gbcData.anchor = GridBagConstraints.WEST; // Rata kiri default
+        gbcData.insets = new Insets(8, 10, 8, 10); // Insets default
 
-        gbc.weightx = 0.4; gbc.anchor = GridBagConstraints.WEST; gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0;
+        // Kolom Nama
+        gbcData.gridx = 0;
+        gbcData.weightx = 0.4; // Lebar 40%
         JLabel namaHeader = new JLabel("Nama");
         styleHeaderLabel(namaHeader);
-        header.add(namaHeader, gbc);
+        dataListPanel.add(namaHeader, gbcData);
 
-        gbc.weightx = 0.4;
-        gbc.gridx = 1;
+        // Kolom Tanggal Lahir
+        gbcData.gridx = 1;
+        gbcData.weightx = 0.4; // Lebar 40%
         JLabel tanggalHeader = new JLabel("Tanggal Lahir");
         styleHeaderLabel(tanggalHeader);
-        header.add(tanggalHeader, gbc);
+        dataListPanel.add(tanggalHeader, gbcData);
 
-        gbc.weightx = 0.2; gbc.anchor = GridBagConstraints.CENTER;
-        gbc.gridx = 2;
+        // --- PERUBAHAN DI SINI ---
+        // Kolom Actions
+        gbcData.gridx = 2;
+        gbcData.weightx = 0.2; // Lebar 20%
+        gbcData.anchor = GridBagConstraints.CENTER; // Kolom ini tetap rata tengah
+
+        // Kita override insets khusus buat cell ini biar geser dikit
+        // Insets(top, left, bottom, right). Left-nya kita gedein biar kedorong ke kanan.
+        gbcData.insets = new Insets(8, 125, 8, 10);
+
         JLabel actionsHeader = new JLabel("Actions");
         styleHeaderLabel(actionsHeader);
-        header.add(actionsHeader, gbc);
+        dataListPanel.add(actionsHeader, gbcData);
 
-        header.setMaximumSize(new Dimension(Integer.MAX_VALUE, header.getPreferredSize().height));
-        return header;
+        // --- JANGAN LUPA BALIKIN LAGI INSETS-NYA KE DEFAULT ---
+        // Biar baris data di bawahnya gak ikutan geser
+        gbcData.insets = new Insets(8, 10, 8, 10);
     }
 
-    public void addDataRow(ModelData data) {
-        JPanel rowPanel = new JPanel(new GridBagLayout());
-        rowPanel.setOpaque(false);
-        rowPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(255,255,255,40)));
-        rowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
-        rowPanel.setBorder(new EmptyBorder(5, 20, 5, 20));
-        GridBagConstraints gbc = new GridBagConstraints();
+    // Method buat nambahin satu baris data
+    public void addDataRow(ModelData data, int rowIndex) {
+        gbcData.gridy = rowIndex; // Set barisnya sesuai parameter
+        gbcData.weighty = 0; // Baris data tidak perlu stretch
+        gbcData.anchor = GridBagConstraints.WEST; // Rata kiri default
+        gbcData.insets = new Insets(12, 10, 12, 10); // Jarak lebih lega buat data
 
-        gbc.weightx = 0.4; gbc.anchor = GridBagConstraints.WEST; gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0;
+        // Kolom Nama
+        gbcData.gridx = 0;
+        gbcData.weightx = 0.4;
         JLabel namaLabel = new JLabel(data.getNama());
         styleDataLabel(namaLabel);
-        rowPanel.add(namaLabel, gbc);
+        dataListPanel.add(namaLabel, gbcData);
 
-        gbc.weightx = 0.4;
-        gbc.gridx = 1;
+        // Kolom Tanggal Lahir
+        gbcData.gridx = 1;
+        gbcData.weightx = 0.4;
         JLabel tanggalLabel = new JLabel(data.getTanggal());
         styleDataLabel(tanggalLabel);
-        rowPanel.add(tanggalLabel, gbc);
+        dataListPanel.add(tanggalLabel, gbcData);
 
-        gbc.weightx = 0.2; gbc.anchor = GridBagConstraints.CENTER;
-        gbc.gridx = 2;
+        // Kolom Actions
+        gbcData.gridx = 2;
+        gbcData.weightx = 0.2;
+        gbcData.anchor = GridBagConstraints.CENTER; // Bikin panel tombol rata tengah
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
         actionPanel.setOpaque(false);
 
         JButton lihatButton = new JButton("Lihat");
         styleActionButton(lihatButton);
         lihatButton.addActionListener(e -> {
-            new PrediksiView(data.getNama(), data.getTanggal(), "Teks prediksi dari DB nanti di sini...", null).setVisible(true);
+            // Nanti di sini kita panggil logic prediksi
+            // Untuk sekarang, kita pake data dummy dulu
+            new PrediksiView(data.getNama(), data.getTanggal(), "Teks prediksi bakal muncul di sini setelah kita implementasi logic-nya...", null).setVisible(true);
         });
 
         JButton editButton = new JButton("Edit");
@@ -222,7 +254,7 @@ public class MenuView extends JFrame {
         JButton deleteButton = new JButton("Delete");
         styleActionButton(deleteButton);
         deleteButton.addActionListener(e -> {
-            int response = JOptionPane.showConfirmDialog(this, "Yakin mau jokul data \"" + data.getNama() + "\"?", "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            int response = JOptionPane.showConfirmDialog(this, "Yakin mau hapus data \"" + data.getNama() + "\"?", "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
             if (response == JOptionPane.YES_OPTION) {
                 controller.deleteData(data.getId_data());
                 refreshTableData();
@@ -232,23 +264,40 @@ public class MenuView extends JFrame {
         actionPanel.add(lihatButton);
         actionPanel.add(editButton);
         actionPanel.add(deleteButton);
-        rowPanel.add(actionPanel, gbc);
-
-        dataListPanel.add(rowPanel);
+        dataListPanel.add(actionPanel, gbcData);
     }
 
-    public void clearDataList() {
+    // Method untuk menampilkan semua data ke tabel
+    public void showAllData(List<ModelData> daftarData) {
+        // 1. Bersihkan panel
         dataListPanel.removeAll();
-        dataListPanel.add(createHeaderPanel());
+
+        // 2. Buat header lagi
+        createHeaderPanel();
+
+        // 3. Loop dan tambahkan semua data
+        if (daftarData != null && !daftarData.isEmpty()) {
+            for (int i = 0; i < daftarData.size(); i++) {
+                // `i + 1` karena baris 0 udah dipake header
+                addDataRow(daftarData.get(i), i + 1);
+            }
+        }
+
+        // 4. Repaint
         dataListPanel.revalidate();
         dataListPanel.repaint();
     }
 
+    // Method untuk refresh data dari database
     public void refreshTableData() {
+        // Method ini yang dipanggil dari luar (misal setelah add/edit/delete)
         if (controller != null) {
+            // Ambil data terbaru dari controller, lalu tampilkan
             controller.showAllData();
         }
     }
+
+    // --- Dari sini ke bawah, method-method styling & getter, gak banyak berubah ---
 
     private void styleHeaderLabel(JLabel label) {
         label.setFont(customHeaderTableFont);
@@ -298,7 +347,6 @@ public class MenuView extends JFrame {
 
     public int getIdUser(){ return loggedInUser.getId(); }
 
-    // --- INI DIA "KUNCI" YANG DITAMBAHKAN ---
     public ControllerData getController() {
         return this.controller;
     }

@@ -1,3 +1,4 @@
+// irhamanakmamah/projek-akhir-prak.-pbo/Projek-Akhir-Prak.-PBO-master/src/Controller/ControllerData.java
 package Controller;
 
 import Model.Data.DAOData;
@@ -14,14 +15,15 @@ import javax.swing.JOptionPane;
 public class ControllerData {
 
     MenuView halamanMenu;
-    // Constructor lain ini sebenarnya tidak perlu jika controller hanya dibuat di MenuView
-    // Tapi kita biarkan saja sesuai struktur awal lu
     EditView halamanEdit;
     AddView halamanAdd;
     PrediksiView halamanPrediksi;
 
     InterfaceDAOData daodata;
-    List<ModelData> daftarData;
+
+    // --- PERUBAHAN DI SINI ---
+    // Kita gak perlu lagi List<ModelData> di sini, biar datanya selalu fresh dari DB
+    // List<ModelData> daftarData;
 
     public ControllerData(MenuView halamanMenu) {
         this.halamanMenu = halamanMenu;
@@ -41,35 +43,23 @@ public class ControllerData {
     }
 
     public void showAllData() {
-        halamanMenu.clearDataList();
-        daftarData = daodata.getAll(halamanMenu.getIdUser());
-
-        if (daftarData != null && !daftarData.isEmpty()) {
-            for (ModelData data : daftarData) {
-                halamanMenu.addDataRow(data);
-            }
-        }
-
-        halamanMenu.revalidate();
-        halamanMenu.repaint();
+        // Ambil data terbaru dari DAO
+        List<ModelData> daftarData = daodata.getAll(halamanMenu.getIdUser());
+        // Kirim data ini ke method baru di MenuView buat nampilin
+        halamanMenu.showAllData(daftarData);
     }
 
-    // --- METHOD BARU YANG BIKIN TOMBOLNYA JALAN ---
     public void insertData(ModelData data) {
-        // Validasi sudah ada di AddView, jadi di sini kita langsung eksekusi
         daodata.insert(data);
         JOptionPane.showMessageDialog(halamanAdd, "Data baru berhasil dijokul!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
     }
 
     public void updateData(ModelData data) {
-        // Validasi sudah ada di EditView, jadi di sini kita langsung eksekusi
         daodata.update(data);
         JOptionPane.showMessageDialog(halamanEdit, "Data berhasil di-update!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
     }
 
     public void deleteData(int id) {
         daodata.delete(id);
-        // Bisa tambahin notif sukses juga kalo mau
-        // JOptionPane.showMessageDialog(halamanMenu, "Data berhasil dihapus!");
     }
 }
