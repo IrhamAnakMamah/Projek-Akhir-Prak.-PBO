@@ -45,7 +45,7 @@ public class DAOData implements InterfaceDAOData{
             int i = 0;
             while(rs.next()){
                 int id = rs.getInt("id_referensi");
-                String masuk = "SELECT persona_text FROM referensi WHERE id_referensi=?;";
+                String masuk = "SELECT * FROM referensi WHERE id_referensi=?;";
                 PreparedStatement statement2;
                 statement2 = Connector.Connect().prepareStatement(masuk);
                 statement2.setInt(1, id);
@@ -56,6 +56,9 @@ public class DAOData implements InterfaceDAOData{
                          modelPrediksi.setZodiac(text);
                     }else{
                         modelPrediksi.setHuruf(text);
+                    }
+                    if(rs2.getString("tipe").equals("zodiac")){
+                        modelPrediksi.setTipe(rs2.getString("key"));
                     }
                 }
                 statement2.close();

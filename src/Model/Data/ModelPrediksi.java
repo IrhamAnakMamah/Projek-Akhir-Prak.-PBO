@@ -2,6 +2,15 @@ package Model.Data;
 
 public class ModelPrediksi {
     String zodiac, huruf;
+    String tipe;
+
+    public String getTipe() {
+        return tipe;
+    }
+
+    public void setTipe(String tipe) {
+        this.tipe = tipe;
+    }
 
     public String getZodiac() {
         return zodiac;

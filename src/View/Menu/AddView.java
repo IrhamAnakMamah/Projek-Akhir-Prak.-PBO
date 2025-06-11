@@ -159,14 +159,15 @@ public class AddView extends JFrame {
 
             // SIMULASI INSERT (GANTI DENGAN LOGIC CONTROLLER ASLI)
             System.out.println("Simulating ADD data: ID User=" + idCurrentUser + ", Nama=" + nama + ", Tanggal=" + tanggal);
-            boolean success = true; // Anggap sukses buat demo
+            boolean success = (newData != null); // Anggap sukses buat demo
 
             if (success) {
                 JOptionPane.showMessageDialog(this, "Data Persona berhasil ditambahkan!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+                parentMenuView.refreshTableData();
                 new PrediksiView(newData); // Refresh tabel di MenuView
                 dispose(); // Tutup AddView
             } else {
-                JOptionPane.showMessageDialog(this, "Gagal menambahkan data!", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Bro lahir duluan!", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 

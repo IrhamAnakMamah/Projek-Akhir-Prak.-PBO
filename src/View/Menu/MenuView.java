@@ -156,7 +156,10 @@ public class MenuView extends JFrame {
         mainPanel.add(bottomButtonPanel, BorderLayout.SOUTH);
 
         // Action Listeners
-        addButton.addActionListener(e -> new AddView(loggedInUser.getId(), this).setVisible(true));
+        addButton.addActionListener(e ->{
+                new AddView(loggedInUser.getId(), this).setVisible(true);
+                refreshTableData();
+        });
         logoutButton.addActionListener(e -> {
             int response = JOptionPane.showConfirmDialog(this, "Yakin mau logout, bro?", "Logout Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
             if (response == JOptionPane.YES_OPTION) {
@@ -246,7 +249,8 @@ public class MenuView extends JFrame {
             DAOData daoData = new DAOData();
             int idData = daoData.getIdData(data.getNama());
             data.setId_data(idData); // Pastikan id_data ter-set sebelum dikirim ke EditView
-            new EditView(data, this);
+            new EditView(data, this).setVisible(true);
+            refreshTableData();
         });
 
         JButton deleteButton = new JButton("Delete");
