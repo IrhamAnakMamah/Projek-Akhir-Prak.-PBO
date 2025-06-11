@@ -204,11 +204,13 @@ public class DAOData implements InterfaceDAOData{
     @Override
     public void deletePrediksi(int id){
         try{
+            System.out.println("MASUUKKKK");
             String query = "DELETE FROM prediksi WHERE id_data=?;";
             PreparedStatement statement;
             statement = Connector.Connect().prepareStatement(query);
             statement.setInt(1, id);
             statement.executeUpdate();
+            System.out.println("KELUARRR");
             statement.close();
         }catch (Exception e){
             System.out.println("Error : " + e.getLocalizedMessage());
