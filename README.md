@@ -107,5 +107,3 @@ The project generally follows an MVC (Model-View-Controller) design pattern:
 Feel free to fork the repository, make improvements, and submit pull requests.
 
 ## License
-
-(You can add your desired license here, e.g., MIT, Apache 2.0, etc.)
