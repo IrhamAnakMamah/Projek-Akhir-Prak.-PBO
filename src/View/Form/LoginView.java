@@ -1,14 +1,14 @@
-package View.Form;
+package View.Form; // Pastikan package-nya bener ya
 
 import Controller.ControllerUser;
-import View.MainView; // Ditambahin import MainView
+import View.MainView;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.*;
-import javax.swing.border.Border; // Udah ada
-// import java.awt.geom.RoundRectangle2D; // Komen ini gak dipake, bisa dihapus kalo mau
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class LoginView extends JFrame {
 
@@ -16,193 +16,174 @@ public class LoginView extends JFrame {
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JButton loginButton;
-    private JButton backButton; // Diganti dari registerButton jadi backButton biar jelas
+    private JButton backButton;
     private JLabel titleLabel;
     private Font helveticaFont;
+    private ImageIcon backgroundImage;
 
     public LoginView() {
-        setTitle("Login");
+        setTitle("Login - Persona Prediction");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 300);
+        setSize(450, 350);
         setLocationRelativeTo(null);
         setResizable(false);
 
-        // Panel utama
+        // Load background image
+        try {
+            java.net.URL bgUrl = getClass().getResource("/resources/BackgroundMainView.png");
+            if (bgUrl != null) {
+                backgroundImage = new ImageIcon(bgUrl);
+            } else {
+                System.err.println("Background image GAK KETEMU di LoginView! Path: /resources/BackgroundMainView.png");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Error pas ngeload background di LoginView: " + e.getMessage());
+        }
+
         JPanel mainPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
-                // Background gradasi
-                Color color1 = new Color(48, 52, 59);
-                Color color2 = new Color(56, 60, 67);
-                GradientPaint gp = new GradientPaint(0, 0, color1, 0, getHeight(), color2);
-                g2d.setPaint(gp);
-                g2d.fillRect(0, 0, getWidth(), getHeight());
+                if (backgroundImage != null) {
+                    g.drawImage(backgroundImage.getImage(), 0, 0, getWidth(), getHeight(), this);
+                } else {
+                    g.setColor(new Color(48, 52, 59)); // Fallback color
+                    g.fillRect(0, 0, getWidth(), getHeight());
+                }
             }
         };
         mainPanel.setLayout(new GridBagLayout());
-        mainPanel.setBorder(new EmptyBorder(20, 0, 0, 0));
+        mainPanel.setBorder(new EmptyBorder(10, 30, 20, 30));
         getContentPane().add(mainPanel);
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        helveticaFont = new Font("Helvetica", Font.PLAIN, 14);
+        helveticaFont = new Font("Helvetica", Font.PLAIN, 14); //
 
-        // Judul
-        titleLabel = new JLabel("Persona Prediction");
-        titleLabel.setForeground(new Color(200, 200, 200));
-        titleLabel.setFont(helveticaFont.deriveFont(Font.BOLD, 16));
+        titleLabel = new JLabel("USER LOGIN");
+        titleLabel.setForeground(new Color(220, 220, 225));
+        titleLabel.setFont(helveticaFont.deriveFont(Font.BOLD, 20));
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(5, 8, 15, 8);
         mainPanel.add(titleLabel, gbc);
+        gbc.insets = new Insets(8, 8, 8, 8); // Reset insets
 
-        // Label username
         JLabel usernameLabel = new JLabel("Username");
-        usernameLabel.setForeground(new Color(200, 200, 200));
-        usernameLabel.setFont(helveticaFont);
-        gbc.gridx = 0;
+        styleFormLabel(usernameLabel);
         gbc.gridy = 1;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.WEST;
         mainPanel.add(usernameLabel, gbc);
 
-        // Field username
         usernameField = new JTextField(20);
-        usernameField.setBackground(new Color(60, 60, 60));
-        usernameField.setForeground(new Color(230, 230, 230));
-        usernameField.setCaretColor(new Color(230, 230, 230));
-        usernameField.setBorder(new RoundedTextFieldBorder(10));
-        usernameField.setFont(helveticaFont);
-        gbc.gridx = 0;
+        styleFormField(usernameField);
         gbc.gridy = 2;
-        gbc.gridwidth = 2;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
         mainPanel.add(usernameField, gbc);
 
-        // Label password
         JLabel passwordLabel = new JLabel("Password");
-        passwordLabel.setForeground(new Color(200, 200, 200));
-        passwordLabel.setFont(helveticaFont);
-        gbc.gridx = 0;
+        styleFormLabel(passwordLabel);
         gbc.gridy = 3;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.WEST;
         mainPanel.add(passwordLabel, gbc);
 
-        // Field password
         passwordField = new JPasswordField(20);
-        passwordField.setBackground(new Color(60, 60, 60));
-        passwordField.setForeground(new Color(230, 230, 230));
-        passwordField.setCaretColor(new Color(230, 230, 230));
-        passwordField.setBorder(new RoundedTextFieldBorder(10));
-        passwordField.setFont(helveticaFont);
-        gbc.gridx = 0;
+        styleFormField(passwordField);
         gbc.gridy = 4;
-        gbc.gridwidth = 2;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
         mainPanel.add(passwordField, gbc);
 
-        // Panel tombol
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 10, 10));
-        buttonPanel.setOpaque(false);
-        gbc.gridx = 0;
+        // Panel buat tombol LOGIN | BACK
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0)); // Jarak antar item 15px
+        buttonPanel.setOpaque(false); // Panelnya transparan
         gbc.gridy = 5;
         gbc.gridwidth = 2;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(15, 8, 8, 8); // Jarak atas panel tombol
         mainPanel.add(buttonPanel, gbc);
 
-        // Tombol Login
-        loginButton = new JButton("Login");
-        loginButton.setForeground(new Color(220, 220, 220));
-        loginButton.setBackground(new Color(80, 100, 180)); // Warna biru
-        loginButton.setBorder(new RoundedBorder(25));
-        loginButton.setFocusPainted(false);
-        loginButton.setFont(helveticaFont.deriveFont(Font.BOLD, 12));
-        loginButton.setPreferredSize(new Dimension(80, 25));
-        loginButton.addMouseListener(new ButtonHoverEffect(loginButton, new Color(60, 80, 160)));
+        loginButton = new JButton("LOGIN");
+        styleTextLikeButton(loginButton);
         buttonPanel.add(loginButton);
 
-        // Tombol Back (sebelumnya Register)
-        backButton = new JButton("Back"); // Teks diubah jadi "Back"
-        backButton.setForeground(new Color(220, 220, 220));
-        backButton.setBackground(new Color(90, 90, 90)); // Warna abu (cocok buat back)
-        backButton.setBorder(new RoundedBorder(25));
-        backButton.setFocusPainted(false);
-        backButton.setFont(helveticaFont.deriveFont(Font.BOLD, 12));
-        backButton.setPreferredSize(new Dimension(80, 25));
-        backButton.addMouseListener(new ButtonHoverEffect(backButton, new Color(70, 70, 70)));
+        // Ini dia PEMBATAS | nya
+        JLabel separatorLabelLogin = new JLabel("|");
+        separatorLabelLogin.setForeground(new Color(210, 210, 220)); // Warna disamain teks tombol
+        separatorLabelLogin.setFont(helveticaFont.deriveFont(Font.PLAIN, 15F)); // Font dan ukuran disamain
+        buttonPanel.add(separatorLabelLogin);
+
+        backButton = new JButton("BACK");
+        styleTextLikeButton(backButton);
         buttonPanel.add(backButton);
 
-        controller = new ControllerUser(this);
+        controller = new ControllerUser(this); //
 
-        // Aksi tombol Back (sebelumnya Register)
-        backButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                new MainView().setVisible(true); // Balik ke MainView
-                dispose(); // Tutup LoginView
-            }
+        backButton.addActionListener(e -> {
+            new MainView().setVisible(true);
+            dispose();
         });
 
-        // Aksi tombol Login
-        loginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                controller.cekLogin();
-            }
-        });
+        loginButton.addActionListener(e -> controller.cekLogin());
+        passwordField.addActionListener(e -> loginButton.doClick());
+
+        JRootPane rootPane = SwingUtilities.getRootPane(loginButton);
+        if (rootPane != null) {
+            rootPane.setDefaultButton(loginButton);
+        }
 
         setVisible(true);
     }
 
-    // --- Inner classes (RoundedBorder, RoundedTextFieldBorder, ButtonHoverEffect) tetep sama ---
-    private static class RoundedBorder implements Border {
-        private int radius;
-        RoundedBorder(int radius) { this.radius = radius; }
-        @Override public Insets getBorderInsets(Component c) { return new Insets(this.radius, this.radius, this.radius, this.radius); }
-        @Override public boolean isBorderOpaque() { return false; }
-        @Override public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-            Graphics2D g2d = (Graphics2D) g.create();
-            g2d.setColor(new Color(114, 137, 218));
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2d.drawRoundRect(x, y, width - 1, height - 1, radius, radius);
-            g2d.dispose();
-        }
+    private void styleFormLabel(JLabel label) {
+        label.setForeground(new Color(180, 190, 200));
+        label.setFont(helveticaFont.deriveFont(Font.PLAIN, 13F));
     }
 
-    private static class RoundedTextFieldBorder implements Border {
-        private int radius;
-        RoundedTextFieldBorder(int radius) { this.radius = radius; }
-        @Override public Insets getBorderInsets(Component c) { return new Insets(radius / 2, radius, radius / 2, radius); }
-        @Override public boolean isBorderOpaque() { return false; }
-        @Override public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-            Graphics2D g2d = (Graphics2D) g.create();
-            g2d.setColor(new Color(230, 230, 230));
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2d.drawRoundRect(x, y, width - 1, height - 1, radius, radius);
-            g2d.dispose();
-        }
+    private void styleFormField(JTextField field) {
+        field.setOpaque(false);
+        field.setBackground(new Color(0,0,0,0)); // Background fully transparent
+        field.setForeground(new Color(225, 230, 235)); // Warna teks inputan
+        field.setCaretColor(new Color(210, 215, 220)); // Warna caret
+        field.setFont(helveticaFont.deriveFont(Font.PLAIN, 15F));
+        // Border garis bawah aja
+        Border underline = BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(150, 160, 170));
+        Border padding = BorderFactory.createEmptyBorder(5, 5, 5, 5); // Padding dalem field
+        field.setBorder(BorderFactory.createCompoundBorder(underline, padding));
     }
 
-    private static class ButtonHoverEffect extends MouseAdapter {
-        private JButton button;
-        private Color originalColor;
-        private Color hoverColor;
-        public ButtonHoverEffect(JButton button, Color hoverColor) {
-            this.button = button;
-            this.originalColor = button.getBackground();
-            this.hoverColor = hoverColor;
-        }
-        @Override public void mouseEntered(MouseEvent e) { button.setBackground(hoverColor); }
-        @Override public void mouseExited(MouseEvent e) { button.setBackground(originalColor); }
+    private void styleTextLikeButton(JButton button) {
+        button.setFont(helveticaFont.deriveFont(Font.BOLD, 15F)); // Ukuran font tombol
+        button.setForeground(new Color(210, 210, 220)); // Warna teks tombol
+        button.setOpaque(false);
+        button.setContentAreaFilled(false);
+        button.setBorderPainted(false);
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        Color originalColor = button.getForeground();
+        Color hoverColor = new Color(150, 180, 255); // Warna pas di-hover
+
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setForeground(hoverColor);
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setForeground(originalColor);
+            }
+        });
     }
 
-    public String getNama() { return usernameField.getText(); }
-    public String getPassword() { return new String(passwordField.getPassword()); }
-    public void Reset() { usernameField.setText(""); passwordField.setText(""); }
+    public String getNama() { return usernameField.getText(); } //
+    public String getPassword() { return new String(passwordField.getPassword()); } //
+    public void Reset() { usernameField.setText(""); passwordField.setText(""); usernameField.requestFocus(); } //
 
-    public static void main(String[] args) { new LoginView(); }
+    public static void main(String[] args) {
+        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }
+        catch (Exception e) { e.printStackTrace(); }
+        SwingUtilities.invokeLater(() -> new LoginView().setVisible(true));
+    }
 }

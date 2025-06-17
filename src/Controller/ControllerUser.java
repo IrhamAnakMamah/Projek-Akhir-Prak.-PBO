@@ -7,6 +7,9 @@ import View.Form.LoginView;
 import View.Form.RegisterView;
 // import View.MainView; // Kalo gak kepake di sini, bisa dikomen/hapus
 import View.Menu.MenuView;
+import View.Menu.CustomDialogView; // Sesuaikan path package-nya
+import javax.swing.ImageIcon; // Buat background image
+import java.awt.Font; // Buat font
 
 import javax.swing.*;
 import java.util.List;
@@ -44,6 +47,18 @@ public class ControllerUser {
      */
 
     public void cekLogin(){
+        Font helveticaFontForDialog = new Font("Helvetica", Font.PLAIN, 14); // Bikin instance font
+        ImageIcon dialogBg = null;
+        try {
+            java.net.URL bgUrl = ControllerUser.class.getResource("/resources/BackgroundMainView.png"); // Pake class ControllerUser buat getResource
+            if (bgUrl != null) {
+                dialogBg = new ImageIcon(bgUrl);
+            } else {
+                System.err.println("Background image GAK KETEMU buat dialog di ControllerUser!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         try{
             ModelUser userDariForm = new ModelUser(); // User dari inputan form
             List<ModelUser> hasilCekUserDb = null;
@@ -68,7 +83,14 @@ public class ControllerUser {
                 // Ambil objek ModelUser yang berhasil login dari list
                 ModelUser userYangLogin = hasilCekUserDb.get(0);
 
-                JOptionPane.showMessageDialog(null, "Anda Berhasil Melakukan Login");
+                CustomDialogView.showStyledMessageDialog(
+                        halamanLogin, // parent component (bisa null atau frame/dialog yg aktif)
+                        "Anda Berhasil Melakukan Login", // message
+                        "Login Sukses", // title dialog
+                        JOptionPane.INFORMATION_MESSAGE, // message type
+                        dialogBg, // background image
+                        helveticaFontForDialog // font
+                );
                 halamanLogin.dispose();
                 // Panggil MenuView dengan ngasih data userYangLogin
                 new MenuView(userYangLogin).setVisible(true);

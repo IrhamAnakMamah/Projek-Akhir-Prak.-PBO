@@ -12,6 +12,28 @@ import java.util.List;
 public class DAOData implements InterfaceDAOData{
 
     @Override
+    public int getIdData(String nama) {
+        int id = 0;
+        try{
+            String query = "SELECT * FROM data WHERE nama=?;";
+            PreparedStatement statement;
+            statement = Connector.Connect().prepareStatement(query);
+            statement.setString(1, nama);
+            ResultSet rs = statement.executeQuery();
+
+            while(rs.next()){
+                id = rs.getInt("id_data");
+                System.out.println("Di get : " + id);
+            }
+            statement.close();
+            return id;
+        }catch (Exception e){
+            System.out.println("Error : " + e.getLocalizedMessage());
+        }
+        return id;
+    }
+
+    @Override
     public ModelPrediksi getData(int idData){
         ModelPrediksi modelPrediksi = new ModelPrediksi();
         try{
@@ -23,7 +45,7 @@ public class DAOData implements InterfaceDAOData{
             int i = 0;
             while(rs.next()){
                 int id = rs.getInt("id_referensi");
-                String masuk = "SELECT persona_text FROM referensi WHERE id_referensi=?;";
+                String masuk = "SELECT * FROM referensi WHERE id_referensi=?;";
                 PreparedStatement statement2;
                 statement2 = Connector.Connect().prepareStatement(masuk);
                 statement2.setInt(1, id);
@@ -34,6 +56,9 @@ public class DAOData implements InterfaceDAOData{
                          modelPrediksi.setZodiac(text);
                     }else{
                         modelPrediksi.setHuruf(text);
+                    }
+                    if(rs2.getString("tipe").equals("zodiac")){
+                        modelPrediksi.setTipe(rs2.getString("key"));
                     }
                 }
                 statement2.close();
@@ -182,11 +207,13 @@ public class DAOData implements InterfaceDAOData{
     @Override
     public void deletePrediksi(int id){
         try{
+            System.out.println("MASUUKKKK");
             String query = "DELETE FROM prediksi WHERE id_data=?;";
             PreparedStatement statement;
             statement = Connector.Connect().prepareStatement(query);
             statement.setInt(1, id);
             statement.executeUpdate();
+            System.out.println("KELUARRR");
             statement.close();
         }catch (Exception e){
             System.out.println("Error : " + e.getLocalizedMessage());
